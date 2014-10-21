@@ -1,0 +1,4 @@
+*.egg
+*.zip
+*.egg-info
+build

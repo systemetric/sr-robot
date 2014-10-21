@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+import ez_setup
+ez_setup.use_setuptools()
+from setuptools import setup, find_packages
+
+setup(
+    name = "sr.robot",
+    version = "0.1",
+    packages = ["sr.robot"],
+    namespace_packages = ["sr"],
+    description = "Student Robotics robot hardware API",
+    install_requires = ["pyserial >= 2.6"],
+)
