@@ -270,9 +270,9 @@ class Robot(object):
 
     def _init_vision(self):
         udev = pyudev.Context()
-        cams = udev.list_devices( subsystem="video4linux",
-                                  # For now, find devices that use this driver
-                                  ID_USB_DRIVER="uvcvideo" )
+        cams = list(udev.list_devices( subsystem="video4linux",
+                                       # For now, find devices that use this driver
+                                       ID_USB_DRIVER="uvcvideo" ))
 
         if len(cams) == 0:
             "Camera isn't connected."
