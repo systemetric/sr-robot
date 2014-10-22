@@ -61,7 +61,10 @@ class Robot(object):
 
         self._initialised = False
         self._quiet = quiet
-        self._acquire_syslock()
+
+        # TODO: Re-enable the lock after mangling herdsman etc to support it
+        # self._acquire_syslock()
+
         self._parse_cmdline()
 
         self._ruggeduino_id_handlers = {}
