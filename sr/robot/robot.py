@@ -194,15 +194,18 @@ class Robot(object):
 
     def _init_devs(self):
         "Initialise the attributes for accessing devices"
-        # Power board v4 is currently not implemented
-        self.power = None
 
+        # Power board
+        self._init_power()
         # Motor boards
         self._init_motors()
         # Servo boards
         self._init_servos()
         # Ruggeduinos
         self._init_ruggeduinos()
+
+    def _init_power(self):
+        self.power = self._init_usb_devices("Power_board_v4", power.Power)[0]
 
     def _init_motors(self):
         self.motors = self._init_usb_devices("MCV4B", motor.Motor)
