@@ -17,7 +17,7 @@ logger = logging.getLogger( "sr.motor" )
 
 class Motor(object):
     "A motor"
-    def __init__(self, path, serialnum = None):
+    def __init__(self, path, busnum, devnum, serialnum = None):
         self.serialnum = serialnum
         self.serial = serial.Serial(path, SERIAL_BAUD, timeout=0.1)
         self.lock = threading.Lock()

@@ -1,7 +1,7 @@
 # Copyright Robert Spanton 2014
 import json, sys, optparse, time, os, glob
 import logging
-import motor, power, ruggeduino, vision
+import motor, power, ruggeduino, vision, servo
 import pyudev
 
 logger = logging.getLogger( "sr.robot" )
@@ -199,10 +199,16 @@ class Robot(object):
 
         # Motor boards
         self._init_motors()
+        # Servo boards
+        self._init_servos()
+        # Ruggeduinos
         self._init_ruggeduinos()
 
     def _init_motors(self):
         self.motors = self._init_usb_devices("MCV4B", motor.Motor)
+
+    def _init_servos(self):
+        self.servos = self._init_usb_devices("Servo_Board_v4", servo.Servo)
 
     def _init_ruggeduinos(self):
         self.ruggeduinos = {}
@@ -239,8 +245,7 @@ class Robot(object):
                        y["ID_SERIAL_SHORT"])
 
         udev = pyudev.Context()
-        devs = list(udev.list_devices( subsystem = "tty",
-                                       ID_MODEL = model ))
+        devs = list(udev.list_devices( ID_MODEL = model ))
         # Sort by serial number
         devs.sort( cmp = _udev_compare_serial )
         return devs
@@ -260,7 +265,10 @@ class Robot(object):
             serialnum = dev["ID_SERIAL_SHORT"]
 
             srdev = ctor( dev.device_node,
-                          serialnum = serialnum )
+                          busnum = int(dev["BUSNUM"]),
+                          devnum = int(dev["DEVNUM"]),
+                          serialnum = serialnum
+                        )
 
             srdevs[n] = srdev
             srdevs[ serialnum ] = srdev
