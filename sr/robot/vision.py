@@ -111,12 +111,10 @@ class Vision(object):
     def __init__(self, camdev, lib):
         self.koki = pykoki.PyKoki(lib)
         self._camdev = camdev
-        self.fd = self.koki.v4l_open_cam(self._camdev)
+        self.camera = self.koki.open_camera(self._camdev)
+
         self.camera_focal_length = None
         self._init_focal_length()
-
-        if self.fd < 0:
-            raise Exception("Couldn't open camera: %s" % ctypes.get_errno() )
 
         # Lock for the use of the vision
         self.lock = threading.Lock()
@@ -133,7 +131,6 @@ class Vision(object):
 
     def __del__(self):
         self._stop()
-        self.koki.v4l_close_cam(self.fd)
 
     def _init_focal_length(self):
         vendor_product_re = re.compile(".* ([0-9A-Za-z]+):([0-9A-Za-z]+) ")
@@ -157,13 +154,12 @@ class Vision(object):
             self._stop()
 
         # The camera goes into a strop if we don't close and open again
-        self.koki.v4l_close_cam(self.fd)
-        self.fd = self.koki.v4l_open_cam(self._camdev)
+        del self.camera
+        self.camera = self.koki.open_camera(self._camdev)
 
-        fmt = self.koki.v4l_create_YUYV_format( res[0], res[1] )
-        self.koki.v4l_set_format(self.fd, fmt)
+        self.camera.format = self.koki.v4l_create_YUYV_format( res[0], res[1] )
 
-        fmt = self.koki.v4l_get_format(self.fd)
+        fmt = self.camera.format
         width = fmt.fmt.pix.width
         height = fmt.fmt.pix.height
 
@@ -175,14 +171,12 @@ class Vision(object):
             self._start()
 
     def _stop(self):
-        self.koki.v4l_stop_stream(self.fd)
-        self.koki.v4l_free_buffers(self._buffers, 1)
-        self._buffers = None
+        self.camera.stop_stream()
         self._streaming = False
 
     def _start(self):
-        self._buffers = self.koki.v4l_prepare_buffers(self.fd, pykoki.c_int(1))
-        self.koki.v4l_start_stream(self.fd)
+        self.camera.prepare_buffers(1)
+        self.camera.start_stream()
         self._streaming = True
 
     def _width_from_code(self, lut, code):
@@ -202,7 +196,7 @@ class Vision(object):
         times = {}
 
         with timer:
-            frame = self.koki.v4l_get_frame_array( self.fd, self._buffers )
+            frame = self.camera.get_frame()
         times["cam"] = timer.time
 
         with timer:
