@@ -284,7 +284,7 @@ class Robot(object):
                     break
 
         if libpath == None:
-            v = vision.Vision(camdev)
+            v = vision.Vision(camdev, "/usr/lib")
         else:
             v = vision.Vision(camdev, libpath)
 
