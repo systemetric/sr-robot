@@ -159,7 +159,6 @@ class Robot(object):
         "Wait for the start signal to happen"
         logger.info( "Waiting for start signal." )
 
-        os.mkfifo( self.startfifo )
         f = open( self.startfifo, "r" )
         d = f.read()
         f.close()
