@@ -205,7 +205,11 @@ class Robot(object):
         self._init_ruggeduinos()
 
     def _init_power(self):
-        self.power = self._init_usb_devices("Power_board_v4", power.Power)[0]
+        boards = self._init_usb_devices("Power_board_v4", power.Power)
+        if len(boards):
+            self.power = boards[0]
+        else:
+            self.power = None
 
     def _init_motors(self):
         self.motors = self._init_usb_devices("MCV4B", motor.Motor)
