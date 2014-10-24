@@ -22,6 +22,15 @@ class Servo(object):
         if self.handle is None:
             raise Exception("Failed to find servo board even though it was enumerated")
 
+        self.init_board()
+
+    def init_board(self):
+        self.handle.controlWrite(0, req_id, 0, 12, "")
+        try:
+            for i in range(12):
+                self[i] = 0
+        except:
+            raise Exception("Failed to initialise servo board. Have you connected its 12V input to the power board?")
 
     def close(self):
         self.handle.close()
