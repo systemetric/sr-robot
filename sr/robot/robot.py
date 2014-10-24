@@ -218,7 +218,7 @@ class Robot(object):
             self.power = None
 
     def _init_motors(self):
-        self.motors = self._init_usb_devices("MCV4B", motor.Motor)
+        self.motors = self._init_usb_devices("MCV4B", motor.Motor, subsystem="tty")
 
     def _init_servos(self):
         self.servos = self._init_usb_devices("Servo_Board_v4", servo.Servo)
@@ -263,8 +263,8 @@ class Robot(object):
         devs.sort( cmp = _udev_compare_serial )
         return devs
 
-    def _init_usb_devices(self, model, ctor):
-        devs = self._list_usb_devices( model )
+    def _init_usb_devices(self, model, ctor, subsystem=None):
+        devs = self._list_usb_devices( model, subsystem )
 
         # Devices stored in a dictionary
         # Each device appears twice in this dictionary:
@@ -277,11 +277,16 @@ class Robot(object):
         for dev in devs:
             serialnum = dev["ID_SERIAL_SHORT"]
 
-            srdev = ctor( dev.device_node,
-                          busnum = int(dev["BUSNUM"]),
-                          devnum = int(dev["DEVNUM"]),
-                          serialnum = serialnum
-                        )
+            if "BUSNUM" in dev:
+                srdev = ctor( dev.device_node,
+                              busnum = int(dev["BUSNUM"]),
+                              devnum = int(dev["DEVNUM"]),
+                              serialnum = serialnum )
+            else:
+                srdev = ctor( dev.device_node,
+                              busnum = None,
+                              devnum = None,
+                              serialnum = serialnum )
 
             srdevs[n] = srdev
             srdevs[ serialnum ] = srdev
