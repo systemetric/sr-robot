@@ -7,11 +7,13 @@ class Battery(object):
 
     @property
     def voltage(self):
-        return round(self._get_vi()[0], 2)
+        """Voltage in Volts"""
+        return round(self._get_vi()[0] / 1000.0, 2)
 
     @property
     def current(self):
-        return round(self._get_vi()[1], 2)
+        """Current in Amps"""
+        return round(self._get_vi()[1] / 1000.0, 2)
 
     def _get_vi(self):
     	""" Measured in mA and mV"""
