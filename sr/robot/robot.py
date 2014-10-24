@@ -208,6 +208,12 @@ class Robot(object):
         boards = self._init_usb_devices("Power_board_v4", power.Power)
         if len(boards):
             self.power = boards[0]
+
+            # Bring the rails up
+            # In the future we will do something more complicated here
+            for x in range(6):
+                self.power.output[x] = True
+
         else:
             self.power = None
 
