@@ -112,6 +112,7 @@ class Robot(object):
         logger.info( "Found the following devices:" )
 
         self._dump_usbdev_dict( self.motors, "Motors" )
+        self._dump_usbdev_dict( self.servos, "Servos" )
         self._dump_usbdev_dict( self.ruggeduinos, "Ruggeduinos" )
         self._dump_webcam()
 
