@@ -226,7 +226,7 @@ class Robot(object):
     def _init_ruggeduinos(self):
         self.ruggeduinos = {}
 
-        for n, dev in enumerate( self._list_usb_devices( "Ruggeduino" ) ):
+        for n, dev in enumerate( self._list_usb_devices( "Ruggeduino", subsystem="tty" ) ):
             handler = None
 
             snum = dev["ID_SERIAL_SHORT"]
@@ -250,7 +250,7 @@ class Robot(object):
             self.ruggeduinos[n] = srdev
             self.ruggeduinos[snum] = srdev
 
-    def _list_usb_devices(self, model):
+    def _list_usb_devices(self, model, subsystem=None):
         "Create a sorted list of USB devices of the given type"
         def _udev_compare_serial(x, y):
             """Compare two udev serial numbers"""
@@ -258,7 +258,7 @@ class Robot(object):
                        y["ID_SERIAL_SHORT"])
 
         udev = pyudev.Context()
-        devs = list(udev.list_devices( ID_MODEL = model ))
+        devs = list(udev.list_devices( ID_MODEL = model, subsystem=subsystem ))
         # Sort by serial number
         devs.sort( cmp = _udev_compare_serial )
         return devs
