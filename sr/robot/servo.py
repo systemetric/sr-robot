@@ -43,6 +43,7 @@ class Servo(object):
         if not 0 <= index < 12:
             raise IndexError('servo index {0} out of range'.format(index))
         # Limit the value to within the valid range
+        value = int(value)
         if value > POS_MAX:
             value = POS_MAX
         elif value < POS_MIN:
