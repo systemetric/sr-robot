@@ -22,6 +22,7 @@ class Servo(object):
         if self.handle is None:
             raise Exception("Failed to find servo board even though it was enumerated")
 
+        self._positions = [0] * 12
         self.init_board()
 
     def init_board(self):
@@ -35,6 +36,9 @@ class Servo(object):
     def close(self):
         self.handle.close()
 
+    def __getitem__(self, index):
+        return self._positions[index]
+
     def __setitem__(self, index, value):
         if not 0 <= index < 12:
             raise IndexError('servo index {0} out of range'.format(index))
@@ -44,6 +48,7 @@ class Servo(object):
         elif value < POS_MIN:
             value = POS_MIN
         self.handle.controlWrite(0, req_id, value, index, "")
+        self._positions[index] = value
 
     def __repr__(self):
         return "Servo( serialnum = \"{0}\" )".format( self.serialnum )
