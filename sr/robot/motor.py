@@ -18,10 +18,25 @@ PWM_MAX = 100
 # The USB model string:
 USB_MODEL = "MCV4B"
 
+# The expected firmware version string
+EXPECTED_FW_VER = "MCV4B:3\n"
+
 logger = logging.getLogger( "sr.motor" )
 
 class IncorrectFirmware(Exception):
-    pass
+    def __init__(self, serialnum, actual_fw):
+        self.serialnum = serialnum
+        self.actual_fw = actual_fw
+        msg = "Found wrong firmware version in motor controller '{0}'.".format(serialnum) \
+            + " Expecting '{0}', got '{1}'.".format(repr(EXPECTED_FW_VER), repr(actual_fw))
+        super(IncorrectFirmware, self).__init__(msg)
+
+class FirmwareReadFail(Exception):
+    def __init__(self, serialnum):
+        self.serialnum = serialnum
+        msg = "Failed to read firmware version from motor controller '{0}'.".format(serialnum) \
+            + " Please ensure that it is powered properly."
+        super(FirmwareReadFail, self).__init__(msg)
 
 class Motor(object):
     "A motor"
@@ -35,9 +50,9 @@ class Motor(object):
             self.serial.write(CMD_RESET)
 
         fw = self._get_fwver()
-        if check_fwver and fw != "MCV4B:3\n":
+        if check_fwver and fw != EXPECTED_FW_VER:
             self.close()
-            raise IncorrectFirmware()
+            raise IncorrectFirmware(self.serialnum, fw)
 
         self.m0 = MotorChannel(self.serial, self.lock, 0)
         self.m1 = MotorChannel(self.serial, self.lock, 1)
@@ -64,7 +79,7 @@ class Motor(object):
                 "Successfully read the firmware version"
                 return r
 
-        raise Exception( "Failed to read firmware version from motor controller" )
+        raise FirmwareReadFail(self.serialnum)
 
     def __repr__(self):
         return "Motor( serialnum = \"{0}\" )".format( self.serialnum )
