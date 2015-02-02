@@ -111,6 +111,7 @@ class Robot(object):
         "Write a list of relevant devices out to the log"
         logger.info( "Found the following devices:" )
 
+        self._dump_power()
         self._dump_usbdev_dict( self.motors, "Motors" )
         self._dump_usbdev_dict( self.servos, "Servos" )
         self._dump_usbdev_dict( self.ruggeduinos, "Ruggeduinos" )
@@ -125,6 +126,14 @@ class Robot(object):
 
         # For now, just display the fact we have a webcam
         logger.info( " - Webcam" )
+
+    def _dump_power(self):
+        "Write information about the power board to stdout"
+        if self.power is None:
+            "No power board!"
+            return
+
+        logger.info( " - {0}".format(self.power) )
 
     def _dump_usbdev_dict(self, devdict, name ):
         "Write the contents of a device dict to stdout"
