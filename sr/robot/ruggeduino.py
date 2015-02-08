@@ -9,6 +9,8 @@ INPUT = "INPUT"
 OUTPUT = "OUTPUT"
 INPUT_PULLUP = "INPUT_PULLUP"
 
+COMMAND_RETRIES = 10
+
 logger = logging.getLogger( "sr.ruggeduino" )
 
 class IgnoredRuggeduino(object):
@@ -31,19 +33,26 @@ class RuggeduinoCmdBase(object):
         self.serial.close()
 
     def command(self, data):
-        """Send a command to the Ruggeduino
+        """Send a command to the Ruggeduino and return the response.
+
+        Writes the command data as bytes to the serial connection, then
+        reads a line of returned data. In the even that the read does not
+        contain anything useful (ie has zero size or doesn't end with a
+        newline character) then retry up to COMMAND_RETRIES times.
 
         Returns the response from the device."""
 
         # The lock must have been acquired to talk to the device
-        assert self.lock.locked()
+        assert self.lock.locked(), "Must acquire lock to talk to ruggeduino"
 
-        for i in range(10):
-            self.serial.write(bytes(data))
+        command = bytes(data)
+        for i in range(COMMAND_RETRIES):
+            self.serial.write(command)
             res = self.serial.readline()
             if len(res) > 0 and res[-1] == "\n":
                 return res
-        raise Exception("Communications with Ruggeduino failed")
+        raise Exception("Communications with Ruggeduino failed for "
+                      + "command '{0}'.".format(command))
 
     def firmware_version_read(self):
         "Read the firmware version from the device"
