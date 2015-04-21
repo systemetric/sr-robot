@@ -63,12 +63,19 @@ PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
 Orientation = namedtuple( "Orientation", "rot_x rot_y rot_z" )
 Point = namedtuple( "Point", "image world polar" )
 
-def create_marker_lut(offset):
-    lut = {}
-    for genre, num in [ ( MARKER_ARENA, 28 ),
-                        ( MARKER_ROBOT, 4 ),
-                        ( MARKER_FLAG, 30 ) ]:
+# Number of markers per group
+marker_group_counts = {
+    "dev": [ ( MARKER_ARENA, 28 ),
+             ( MARKER_ROBOT, 4 ),
+             ( MARKER_FLAG, 30 ) ],
+    "comp": [ ( MARKER_ARENA, 28 ),
+              ( MARKER_ROBOT, 4 ),
+              ( MARKER_FLAG, 8 ) ],
+}
 
+def create_marker_lut(offset, counts):
+    lut = {}
+    for genre, num in counts:
         for n in range(0,num):
             base_code = marker_offsets[genre] + n
             real_code = offset + base_code
@@ -79,8 +86,10 @@ def create_marker_lut(offset):
             lut[real_code] = m
     return lut
 
-marker_luts = { "dev": create_marker_lut(0),
-                "comp": create_marker_lut(100) }
+marker_luts = { "dev": { "A": create_marker_lut(0, marker_group_counts["dev"]),
+                         "B": create_marker_lut(0, marker_group_counts["dev"]) },
+                "comp": { "A": create_marker_lut(100, marker_group_counts["comp"]),
+                          "B": create_marker_lut(140, marker_group_counts["comp"]) } }
 
 MarkerBase = namedtuple( "Marker", "info timestamp res vertices centre orientation" ) 
 class Marker(MarkerBase):
@@ -176,7 +185,7 @@ class Vision(object):
 
         return lut[code].size
 
-    def see(self, mode, res, stats):
+    def see(self, mode, arena, res, stats):
         self.lock.acquire()
         self._set_res(res)
 
@@ -203,17 +212,17 @@ class Vision(object):
 
         with timer:
             markers = self.koki.find_markers_fp( img,
-                                                 functools.partial( self._width_from_code, marker_luts[mode] ),
+                                                 functools.partial( self._width_from_code, marker_luts[mode][arena] ),
                                                  params )
         times["find_markers"] = timer.time
 
         srmarkers = []
         for m in markers:
-            if m.code not in marker_luts[mode]:
+            if m.code not in marker_luts[mode][arena]:
                 "Ignore other sets of codes"
                 continue
 
-            info = marker_luts[mode][int(m.code)]
+            info = marker_luts[mode][arena][int(m.code)]
 
             vertices = []
             for v in m.vertices:

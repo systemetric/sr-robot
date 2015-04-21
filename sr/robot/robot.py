@@ -340,4 +340,5 @@ class Robot(object):
 
         return self.vision.see( res = res,
                                 mode = self.mode,
+                                arena = self.arena,
                                 stats = stats )
