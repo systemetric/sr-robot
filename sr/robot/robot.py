@@ -175,16 +175,17 @@ class Robot(object):
 
         j = json.loads(d)
 
-        if "zone" not in j or "mode" not in j:
-            raise Exception( "'zone' and 'mode' must be in startup info" )
-
-        self.mode = j["mode"]
-        self.zone = j["zone"]
+        for prop in ["zone", "mode", "arena"]:
+            if prop not in j:
+                raise Exception( "'{}' must be in startup info".format(prop) )
+            setattr(self, prop, j[prop])
 
         if self.mode not in ["comp", "dev"]:
             raise Exception( "mode of '%s' is not supported -- must be 'comp' or 'dev'" % self.mode )
         if self.zone < 0 or self.zone > 3:
             raise Exception( "zone must be in range 0-3 inclusive -- value of %i is invalid" % self.zone )
+        if self.arena not in ["A", "B"]:
+            raise Exception( "arena must be A or B")
 
     @pre_init
     def ruggeduino_set_handler_by_id( self, r_id, handler ):
