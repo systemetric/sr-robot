@@ -117,6 +117,6 @@ class Power:
             else:
                 raise ValueError('{} is not a recognised note.'.format(note))
         elif isinstance(note, int):
-            self.buzz_piezo(note, duration)
+            self.buzz_piezo(duration, note)
         else:
             raise ValueError('`note` must be either a recognised note character or an integer frequency.')
