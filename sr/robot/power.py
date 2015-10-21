@@ -104,19 +104,19 @@ class Power:
         data = struct.pack("HH", frequency, duration)
         self.handle.controlWrite(0, 64, 0, Power.CMD_WRITE_piezo, data)
 
-    def beep(self, duration, note='c'):
+    def beep(self, duration, note=None, frequency=None):
 	notes = { 
 	    'c': 261, 'd': 294, 'e': 329,
 	    'f': 349, 'g': 392, 'a': 440,
 	    'b': 493, 'uc': 523
 	}
-        if isinstance(note, basestring):
+        if note is not None:
 	    note_frequency = notes.get(note.lower())
 	    if note_frequency is not None:
                 self.buzz_piezo(duration, note_frequency)
             else:
                 raise ValueError('{} is not a recognised note.'.format(note))
-        elif isinstance(note, int):
-            self.buzz_piezo(duration, note)
+        elif frequency is not None:
+            self.buzz_piezo(duration, frequency)
         else:
-            raise ValueError('`note` must be either a recognised note character or an integer frequency.')
+            raise ValueError('`note` must be either a recognised note character or `frequency` an integer frequency.')
