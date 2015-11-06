@@ -42,35 +42,38 @@ focal_length_lut = {
     (0x046d, 0x0825): C270_focal_length
 }
 
-MARKER_ARENA, MARKER_ROBOT, MARKER_FLAG = 'arena', 'robot', 'flag'
+MARKER_ARENA, MARKER_ROBOT, MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE = 'arena', 'robot', 'top', 'bottom', 'side'
+TOKEN_NETS = ("NET_A", "NET_B", "NET_C")
 
 marker_offsets = {
     MARKER_ARENA: 0,
     MARKER_ROBOT: 28,
-    MARKER_FLAG: 32
 }
+MARKER_TOKEN_OFFSET = 32
 
 marker_sizes = {
     MARKER_ARENA: 0.25 * (10.0/12),
     MARKER_ROBOT: 0.1 * (10.0/12),
-    MARKER_FLAG: 0.25 * (10.0/12)
+    MARKER_TOP: 0.2 * (10.0/12),
+    MARKER_BOTTOM: 0.2 * (10.0/12),
+    MARKER_SIDE: 0.2 * (10.0/12)
 }
 
-MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size" )
+MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size token_net" )
 ImageCoord = namedtuple( "ImageCoord", "x y" )
 WorldCoord = namedtuple( "WorldCoord", "x y z" )
 PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
 Orientation = namedtuple( "Orientation", "rot_x rot_y rot_z" )
 Point = namedtuple( "Point", "image world polar" )
 
+TOKEN_MARKERS = [(MARKER_TOP, 1),(MARKER_BOTTOM, 1),(MARKER_SIDE,4)]
+
 # Number of markers per group
 marker_group_counts = {
     "dev": [ ( MARKER_ARENA, 28 ),
-             ( MARKER_ROBOT, 4 ),
-             ( MARKER_FLAG, 30 ) ],
+             ( MARKER_ROBOT, 4 ) ],
     "comp": [ ( MARKER_ARENA, 28 ),
-              ( MARKER_ROBOT, 4 ),
-              ( MARKER_FLAG, 8 ) ],
+              ( MARKER_ROBOT, 4 ) ],
 }
 
 def create_marker_lut(offset, counts):
@@ -82,14 +85,31 @@ def create_marker_lut(offset, counts):
             m = MarkerInfo( code = base_code,
                             marker_type = genre,
                             offset = n,
-                            size = marker_sizes[genre] )
+                            size = marker_sizes[genre],
+                            token_net = None )
             lut[real_code] = m
+
+    # Now add on the token markers
+    base_code = MARKER_TOKEN_OFFSET
+    for net in TOKEN_NETS:
+        for face in (MARKER_TOP, MARKER_BOTTOM) + (MARKER_SIDE,)*4:
+            real_code = offset + base_code
+
+            m = MarkerInfo( code = base_code,
+                            marker_type = face,
+                            offset = None,
+                            size = marker_sizes[face],
+                            token_net = net )
+            lut[real_code] = m
+
+            base_code += 1
+
     return lut
 
 marker_luts = { "dev": { "A": create_marker_lut(0, marker_group_counts["dev"]),
                          "B": create_marker_lut(0, marker_group_counts["dev"]) },
                 "comp": { "A": create_marker_lut(100, marker_group_counts["comp"]),
-                          "B": create_marker_lut(140, marker_group_counts["comp"]) } }
+                          "B": create_marker_lut(150, marker_group_counts["comp"]) } }
 
 MarkerBase = namedtuple( "Marker", "info timestamp res vertices centre orientation" ) 
 class Marker(MarkerBase):
