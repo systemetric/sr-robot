@@ -43,7 +43,8 @@ focal_length_lut = {
 }
 
 MARKER_ARENA, MARKER_ROBOT, MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE = 'arena', 'robot', 'top', 'bottom', 'side'
-TOKEN_NETS = ("NET_A", "NET_B", "NET_C")
+NET_A, NET_B, NET_C = "net-a", "net-b", "net-c"
+TOKEN_NETS = NET_A, NET_B, NET_C
 
 marker_offsets = {
     MARKER_ARENA: 0,
