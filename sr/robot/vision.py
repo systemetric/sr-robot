@@ -42,7 +42,9 @@ focal_length_lut = {
     (0x046d, 0x0825): C270_focal_length
 }
 
-MARKER_ARENA, MARKER_ROBOT, MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE = 'arena', 'robot', 'top', 'bottom', 'side'
+MARKER_ARENA, MARKER_ROBOT, MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM, MARKER_TOKEN_SIDE = 'arena', 'robot', 'top', 'bottom', 'side'
+# Also keep earlier names available
+MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE = MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM, MARKER_TOKEN_SIDE
 NET_A, NET_B, NET_C = "net-a", "net-b", "net-c"
 TOKEN_NETS = NET_A, NET_B, NET_C
 
@@ -55,9 +57,9 @@ MARKER_TOKEN_OFFSET = 32
 marker_sizes = {
     MARKER_ARENA: 0.25 * (10.0/12),
     MARKER_ROBOT: 0.1 * (10.0/12),
-    MARKER_TOP: 0.2 * (10.0/12),
-    MARKER_BOTTOM: 0.2 * (10.0/12),
-    MARKER_SIDE: 0.2 * (10.0/12)
+    MARKER_TOKEN_TOP: 0.2 * (10.0/12),
+    MARKER_TOKEN_BOTTOM: 0.2 * (10.0/12),
+    MARKER_TOKEN_SIDE: 0.2 * (10.0/12)
 }
 
 MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size token_net" )
@@ -67,7 +69,7 @@ PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
 Orientation = namedtuple( "Orientation", "rot_x rot_y rot_z" )
 Point = namedtuple( "Point", "image world polar" )
 
-TOKEN_MARKERS = [(MARKER_TOP, 1),(MARKER_BOTTOM, 1),(MARKER_SIDE,4)]
+TOKEN_MARKERS = [(MARKER_TOKEN_TOP, 1),(MARKER_TOKEN_BOTTOM, 1),(MARKER_TOKEN_SIDE,4)]
 
 # Number of markers per group
 marker_group_counts = {
@@ -93,7 +95,7 @@ def create_marker_lut(offset, counts):
     # Now add on the token markers
     base_code = MARKER_TOKEN_OFFSET
     for net in TOKEN_NETS:
-        for face in (MARKER_TOP, MARKER_BOTTOM) + (MARKER_SIDE,)*4:
+        for face in (MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM) + (MARKER_TOKEN_SIDE,)*4:
             real_code = offset + base_code
 
             m = MarkerInfo( code = base_code,
