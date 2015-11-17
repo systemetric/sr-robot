@@ -69,8 +69,6 @@ PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
 Orientation = namedtuple( "Orientation", "rot_x rot_y rot_z" )
 Point = namedtuple( "Point", "image world polar" )
 
-TOKEN_MARKERS = [(MARKER_TOKEN_TOP, 1),(MARKER_TOKEN_BOTTOM, 1),(MARKER_TOKEN_SIDE,4)]
-
 # Number of markers per group
 marker_group_counts = {
     "dev": [ ( MARKER_ARENA, 28 ),
