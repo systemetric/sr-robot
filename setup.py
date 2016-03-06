@@ -11,6 +11,7 @@ setup(
     description = "Student Robotics robot hardware API",
     install_requires = ["pyserial >= 2.6",
                         "pyudev >= 0.15",
+                        "libusb1 >= 1.4",
                         "pykoki >= 0.0.1"
                     ],
 )
