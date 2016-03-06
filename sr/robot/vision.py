@@ -183,9 +183,11 @@ class Vision(object):
         width = fmt.fmt.pix.width
         height = fmt.fmt.pix.height
 
-        if width != res[0] or height != res[1]:
-            raise ValueError( "Unsupported image resolution" )
-        self._res = (width, height)
+        actual = (width, height)
+
+        if res != actual:
+            raise ValueError( "Unsupported image resolution {0} (got: {1})".format(res, actual) )
+        self._res = actual
 
         if was_streaming:
             self._start()
