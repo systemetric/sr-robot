@@ -128,7 +128,8 @@ class Timer(object):
         return False
 
 class Vision(object):
-    def __init__(self, camdev, lib):
+    # Resolution defaults to 800x600
+    def __init__(self, camdev, lib, res=(800,600)):
         self.koki = pykoki.PyKoki(lib)
         self._camdev = camdev
         self.camera = self.koki.open_camera(self._camdev)
@@ -144,8 +145,7 @@ class Vision(object):
         self._buffers = None
         self._streaming = False
 
-        # Default to 800x600        
-        self._set_res( (800,600) )
+        self._set_res( res )
         self._start()
         self.lock.release()
 
