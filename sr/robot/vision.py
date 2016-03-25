@@ -257,6 +257,11 @@ class Vision(object):
                                         # libkoki does not yet provide these coords
                                         polar = PolarCoord( 0,0,0 ) ) )
 
+            num_quarter_turns = int(m.rotation_offset / 90)
+            num_quarter_turns %= 4
+
+            vertices = vertices[num_quarter_turns:] + vertices[:num_quarter_turns]
+
             centre = Point( image = ImageCoord( x = m.centre.image.x,
                                                 y = m.centre.image.y ),
                             world = WorldCoord( x = m.centre.world.x,
