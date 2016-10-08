@@ -1,6 +1,10 @@
 import usb1
 import struct
 
+
+OUT_H0, OUT_H1, OUT_L0, OUT_L1, OUT_L2, OUT_L3 = range(6)
+
+
 class Battery(object):
     def __init__(self, handle):
         self.handle = handle

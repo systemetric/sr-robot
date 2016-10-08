@@ -4,6 +4,7 @@
 import log as _log
 
 from robot import ( Robot, NoCameraPresent )
+from power import ( OUT_H0, OUT_H1, OUT_L0, OUT_L1, OUT_L2, OUT_L3 )
 from vision import ( MARKER_ARENA, MARKER_ROBOT,
                     MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE,
                     MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM, MARKER_TOKEN_SIDE,
