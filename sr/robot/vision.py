@@ -42,11 +42,7 @@ focal_length_lut = {
     (0x046d, 0x0825): C270_focal_length
 }
 
-MARKER_ARENA, MARKER_ROBOT, MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM, MARKER_TOKEN_SIDE = 'arena', 'robot', 'top', 'bottom', 'side'
-# Also keep earlier names available
-MARKER_TOP, MARKER_BOTTOM, MARKER_SIDE = MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM, MARKER_TOKEN_SIDE
-NET_A, NET_B, NET_C = "net-a", "net-b", "net-c"
-TOKEN_NETS = NET_A, NET_B, NET_C
+MARKER_ARENA, MARKER_ROBOT, MARKER_TOKEN_A, MARKER_TOKEN_B, MARKER_TOKEN_C = 'arena', 'robot', 'token-a', 'token-b', 'token-c'
 
 marker_offsets = {
     MARKER_ARENA: 0,
@@ -57,12 +53,18 @@ MARKER_TOKEN_OFFSET = 32
 marker_sizes = {
     MARKER_ARENA: 0.25 * (10.0/12),
     MARKER_ROBOT: 0.1 * (10.0/12),
-    MARKER_TOKEN_TOP: 0.2 * (10.0/12),
-    MARKER_TOKEN_BOTTOM: 0.2 * (10.0/12),
-    MARKER_TOKEN_SIDE: 0.2 * (10.0/12)
+    MARKER_TOKEN_A: 0.2 * (10.0/12),
+    MARKER_TOKEN_B: 0.2 * (10.0/12),
+    MARKER_TOKEN_C: 0.2 * (10.0/12)
 }
 
-MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size token_net" )
+token_counts = [
+    (MARKER_TOKEN_A, 4),
+    (MARKER_TOKEN_B, 4),
+    (MARKER_TOKEN_C, 1)
+]
+
+MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size" )
 ImageCoord = namedtuple( "ImageCoord", "x y" )
 WorldCoord = namedtuple( "WorldCoord", "x y z" )
 PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
@@ -86,21 +88,19 @@ def create_marker_lut(offset, counts):
             m = MarkerInfo( code = base_code,
                             marker_type = genre,
                             offset = n,
-                            size = marker_sizes[genre],
-                            token_net = None )
+                            size = marker_sizes[genre])
             lut[real_code] = m
 
     # Now add on the token markers
     base_code = MARKER_TOKEN_OFFSET
-    for net in TOKEN_NETS:
-        for face in (MARKER_TOKEN_TOP, MARKER_TOKEN_BOTTOM) + (MARKER_TOKEN_SIDE,)*4:
+    for marker_type, count in token_counts:
+        for token_count in range(count):
             real_code = offset + base_code
 
             m = MarkerInfo( code = base_code,
-                            marker_type = face,
-                            offset = None,
-                            size = marker_sizes[face],
-                            token_net = net )
+                            marker_type = marker_type,
+                            offset = token_count,
+                            size = marker_sizes[marker_type])
             lut[real_code] = m
 
             base_code += 1
