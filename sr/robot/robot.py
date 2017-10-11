@@ -7,7 +7,7 @@ import pyudev
 logger = logging.getLogger( "sr.robot" )
 
 def setup_logging():
-    "Apply default settings for logging"
+    """Apply default settings for logging"""
     # (We do this by default so that our users
     # don't have to worry about logging normally)
 
@@ -22,23 +22,23 @@ def setup_logging():
     logger.addHandler(h)
 
 class NoCameraPresent(Exception):
-    "Camera not connected."
+    """Camera not connected."""
 
     def __str__(self):
         return "No camera found."
 
 class AlreadyInitialised(Exception):
-    "The robot has been initialised twice"
+    """The robot has been initialised twice"""
     def __str__(self):
         return "Robot object can only be initialised once."
 
 class UnavailableAfterInit(Exception):
-    "The called function is unavailable after init()"
+    """The called function is unavailable after init()"""
     def __str__(self):
         return "The called function is unavailable after init()"
 
 def pre_init(f):
-    "Decorator for functions that may only be called before init()"
+    """Decorator for functions that may only be called before init()"""
 
     def g(self, *args, **kw):
         if self._initialised:
@@ -86,7 +86,7 @@ class Robot(object):
                     config_logging = False )
 
     def init(self):
-        "Find and initialise hardware"
+        # Find and initialise hardware
         if self._initialised:
             raise AlreadyInitialised()
 
@@ -108,7 +108,7 @@ class Robot(object):
             raise Exception( "Robot lock could not be acquired. Have you created more than one Robot() object?" )
 
     def _dump_devs(self):
-        "Write a list of relevant devices out to the log"
+        """Write a list of relevant devices out to the log"""
         logger.info( "Found the following devices:" )
 
         self._dump_power()
@@ -118,25 +118,25 @@ class Robot(object):
         self._dump_webcam()
 
     def _dump_webcam(self):
-        "Write information about the webcam to stdout"
+        """Write information about the webcam to stdout"""
 
         if not hasattr(self, "vision"):
-            "No webcam"
+            # No webcam
             return
 
         # For now, just display the fact we have a webcam
         logger.info( " - Webcam" )
 
     def _dump_power(self):
-        "Write information about the power board to stdout"
+        """Write information about the power board to stdout"""
         if self.power is None:
-            "No power board!"
+            # No power board!
             return
 
         logger.info( " - {0}".format(self.power) )
 
     def _dump_usbdev_dict(self, devdict, name ):
-        "Write the contents of a device dict to stdout"
+        """Write the contents of a device dict to stdout"""
 
         if len(devdict) == 0:
             return
@@ -152,7 +152,7 @@ class Robot(object):
                            "motor": motor } )
 
     def _parse_cmdline(self):
-        "Parse the command line arguments"
+        """Parse the command line arguments"""
         parser = optparse.OptionParser()
 
         parser.add_option( "--usbkey", type="string", dest="usbkey",
@@ -166,7 +166,7 @@ class Robot(object):
         self.startfifo = options.startfifo
 
     def wait_start(self):
-        "Wait for the start signal to happen"
+        """Wait for the start signal to happen"""
         logger.info( "Waiting for start signal." )
 
         f = open( self.startfifo, "r" )
@@ -199,12 +199,12 @@ class Robot(object):
 
     @pre_init
     def ruggeduino_ignore_id( self, r_id ):
-        "Ignore the Ruggeduino with the given ID"
+        """Ignore the Ruggeduino with the given ID"""
         logger.debug( "Ruggeduino ID '%s' set to be ignored", r_id )
         self.ruggeduino_set_handler_by_id( r_id, ruggeduino.IgnoredRuggeduino )
 
     def _init_devs(self):
-        "Initialise the attributes for accessing devices"
+        """Initialise the attributes for accessing devices"""
 
         # Power board
         self._init_power()
@@ -262,7 +262,7 @@ class Robot(object):
             self.ruggeduinos[snum] = srdev
 
     def _list_usb_devices(self, model, subsystem=None):
-        "Create a sorted list of USB devices of the given type"
+        """Create a sorted list of USB devices of the given type"""
         def _udev_compare_serial(x, y):
             """Compare two udev serial numbers"""
             return cmp(x["ID_SERIAL_SHORT"],
@@ -312,7 +312,7 @@ class Robot(object):
                                        ID_USB_DRIVER="uvcvideo" ))
 
         if len(cams) == 0:
-            "Camera isn't connected."
+            # Camera isn't connected.
             return
 
         camdev = cams[0].device_node

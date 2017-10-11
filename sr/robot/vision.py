@@ -164,9 +164,9 @@ class Vision(object):
                return
 
     def _set_res(self, res):
-        "Set the resolution of the camera if different to what we were"
+        """Set the resolution of the camera if different to what we were"""
         if res == self._res:
-            "Resolution already the requested one"
+            # Resolution already the requested one
             return
 
         was_streaming = self._streaming
@@ -242,7 +242,7 @@ class Vision(object):
         srmarkers = []
         for m in markers:
             if m.code not in marker_luts[mode][arena]:
-                "Ignore other sets of codes"
+                # Ignore other sets of codes
                 continue
 
             info = marker_luts[mode][arena][int(m.code)]

@@ -39,7 +39,7 @@ class FirmwareReadFail(Exception):
         super(FirmwareReadFail, self).__init__(msg)
 
 class Motor(object):
-    "A motor"
+    """A motor"""
     def __init__(self, path, busnum, devnum,
                  serialnum = None, check_fwver = True):
         self.serialnum = serialnum
@@ -76,7 +76,7 @@ class Motor(object):
                 r = self.serial.readline()
 
             if len(r) > 0 and r[-1] == "\n":
-                "Successfully read the firmware version"
+                # Successfully read the firmware version
                 return r
 
         raise FirmwareReadFail(self.serialnum)
@@ -85,7 +85,7 @@ class Motor(object):
         return "Motor( serialnum = \"{0}\" )".format( self.serialnum )
 
     def _jump_to_bootloader(self):
-        "Jump to the bootloader"
+        """Jump to the bootloader"""
         MAGIC = "Entering bootloader\n"
 
         # Up the timeout to ensure bootloader response is received
@@ -126,7 +126,7 @@ class MotorChannel(object):
 
     @power.setter
     def power(self, value):
-        "target setter function"
+        """target setter function"""
         value = int(value)
         self._power = value
 
@@ -149,7 +149,7 @@ class MotorChannel(object):
 
     @property
     def use_brake(self):
-        "Whether to use the brake when at 0 speed"
+        """Whether to use the brake when at 0 speed"""
         return self._use_brake
 
     @use_brake.setter
@@ -157,5 +157,5 @@ class MotorChannel(object):
         self._use_brake = value
 
         if self.power == 0:
-            "Implement the new braking setting"
+            # Implement the new braking setting
             self.power = 0

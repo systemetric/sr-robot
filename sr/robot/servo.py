@@ -9,7 +9,7 @@ POS_MAX = 100
 logger = logging.getLogger( "sr.servo" )
 
 class Servo(object):
-    "A servo board"
+    """A servo board"""
     def __init__(self, path, busnum, devnum, serialnum = None):
         self.serialnum = serialnum
 

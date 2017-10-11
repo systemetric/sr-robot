@@ -20,7 +20,7 @@ class Battery(object):
         return round(self._get_vi()[1] / 1000.0, 2)
 
     def _get_vi(self):
-        """ Measured in mA and mV"""
+        """Measured in mA and mV"""
         result = self.handle.controlRead(0x80, 64, 0, Power.CMD_READ_batt, 8)
         current, voltage = struct.unpack("ii", result)
         return voltage, current
