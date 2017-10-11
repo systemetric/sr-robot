@@ -154,7 +154,7 @@ class Vision(object):
 
     def _init_focal_length(self):
         vendor_product_re = re.compile(".* ([0-9A-Za-z]+):([0-9A-Za-z]+) ")
-        p = subprocess.Popen(["lsusb"], stdout=subprocess.PIPE)
+        p = subprocess.Popen(["lsusb"], stdout=subprocess.PIPE, universal_newlines=True)
         stdout, _ = p.communicate()
         for line in stdout.splitlines():
             match = vendor_product_re.match(line)
