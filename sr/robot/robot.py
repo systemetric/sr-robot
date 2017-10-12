@@ -1,8 +1,10 @@
 # Copyright Robert Spanton 2014
 import json, sys, optparse, time, os, glob
 import logging
-import motor, power, ruggeduino, vision, servo
+
 import pyudev
+
+from sr.robot import motor, power, ruggeduino, vision, servo
 
 logger = logging.getLogger( "sr.robot" )
 
