@@ -21,7 +21,8 @@ USB_MODEL = "MCV4B"
 # The expected firmware version string
 EXPECTED_FW_VER = "MCV4B:3\n"
 
-logger = logging.getLogger( "sr.motor" )
+logger = logging.getLogger("sr.motor")
+
 
 class IncorrectFirmware(Exception):
     def __init__(self, serialnum, actual_fw):
@@ -31,6 +32,7 @@ class IncorrectFirmware(Exception):
             + " Expecting '{0}', got '{1}'.".format(repr(EXPECTED_FW_VER), repr(actual_fw))
         super(IncorrectFirmware, self).__init__(msg)
 
+
 class FirmwareReadFail(Exception):
     def __init__(self, serialnum):
         self.serialnum = serialnum
@@ -38,10 +40,11 @@ class FirmwareReadFail(Exception):
             + " Please ensure that it is powered properly."
         super(FirmwareReadFail, self).__init__(msg)
 
+
 class Motor(object):
     """A motor"""
     def __init__(self, path, busnum, devnum,
-                 serialnum = None, check_fwver = True):
+                 serialnum=None, check_fwver=True):
         self.serialnum = serialnum
         self.serial = serial.Serial(path, SERIAL_BAUD, timeout=0.1)
         self.lock = threading.Lock()
@@ -82,7 +85,7 @@ class Motor(object):
         raise FirmwareReadFail(self.serialnum)
 
     def __repr__(self):
-        return "Motor( serialnum = \"{0}\" )".format( self.serialnum )
+        return "Motor( serialnum = \"{0}\" )".format(self.serialnum)
 
     def _jump_to_bootloader(self):
         """Jump to the bootloader"""
@@ -95,7 +98,7 @@ class Motor(object):
             self.serial.write(CMD_BOOTLOADER)
 
         # Check the command has been received
-        r = self.serial.read( len(MAGIC) )
+        r = self.serial.read(len(MAGIC))
 
         if r != MAGIC:
             # There's not much we can do about this at the moment
@@ -104,6 +107,7 @@ class Motor(object):
         # Get rid of any junk that comes from the motor board
         # (we seem to get a null character coming through)
         self.serial.read()
+
 
 class MotorChannel(object):
     def __init__(self, serial, lock, channel):

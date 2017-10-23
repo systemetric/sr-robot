@@ -6,11 +6,12 @@ req_id = 64
 POS_MIN = -100
 POS_MAX = 100
 
-logger = logging.getLogger( "sr.servo" )
+logger = logging.getLogger("sr.servo")
+
 
 class Servo(object):
     """A servo board"""
-    def __init__(self, path, busnum, devnum, serialnum = None):
+    def __init__(self, path, busnum, devnum, serialnum=None):
         self.serialnum = serialnum
 
         self.ctx = usb1.USBContext()
@@ -52,4 +53,4 @@ class Servo(object):
         self._positions[index] = value
 
     def __repr__(self):
-        return "Servo( serialnum = \"{0}\" )".format( self.serialnum )
+        return "Servo( serialnum = \"{0}\" )".format(self.serialnum)

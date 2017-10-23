@@ -1,5 +1,11 @@
-import pykoki, threading, time, functools, re, subprocess
+import threading
+import time
+import functools
+import re
+import subprocess
 from collections import namedtuple
+
+import pykoki
 from pykoki import CameraParams, Point2Df, Point2Di
 
 C500_focal_length = {
@@ -64,31 +70,32 @@ token_counts = [
     (MARKER_TOKEN_C, 1)
 ]
 
-MarkerInfo = namedtuple( "MarkerInfo", "code marker_type offset size" )
-ImageCoord = namedtuple( "ImageCoord", "x y" )
-WorldCoord = namedtuple( "WorldCoord", "x y z" )
-PolarCoord = namedtuple( "PolarCoord", "length rot_x rot_y" )
-Orientation = namedtuple( "Orientation", "rot_x rot_y rot_z" )
-Point = namedtuple( "Point", "image world polar" )
+MarkerInfo = namedtuple("MarkerInfo", "code marker_type offset size")
+ImageCoord = namedtuple("ImageCoord", "x y")
+WorldCoord = namedtuple("WorldCoord", "x y z")
+PolarCoord = namedtuple("PolarCoord", "length rot_x rot_y")
+Orientation = namedtuple("Orientation", "rot_x rot_y rot_z")
+Point = namedtuple("Point", "image world polar")
 
 # Number of markers per group
 marker_group_counts = {
-    "dev": [ ( MARKER_ARENA, 28 ),
-             ( MARKER_ROBOT, 4 ) ],
-    "comp": [ ( MARKER_ARENA, 28 ),
-              ( MARKER_ROBOT, 4 ) ],
+    "dev": [(MARKER_ARENA, 28),
+            (MARKER_ROBOT, 4)],
+    "comp": [(MARKER_ARENA, 28),
+             (MARKER_ROBOT, 4)],
 }
+
 
 def create_marker_lut(offset, counts):
     lut = {}
     for genre, num in counts:
-        for n in range(0,num):
+        for n in range(0, num):
             base_code = marker_offsets[genre] + n
             real_code = offset + base_code
-            m = MarkerInfo( code = base_code,
-                            marker_type = genre,
-                            offset = n,
-                            size = marker_sizes[genre])
+            m = MarkerInfo(code=base_code,
+                           marker_type=genre,
+                           offset=n,
+                           size=marker_sizes[genre])
             lut[real_code] = m
 
     # Now add on the token markers
@@ -97,27 +104,33 @@ def create_marker_lut(offset, counts):
         for token_count in range(count):
             real_code = offset + base_code
 
-            m = MarkerInfo( code = base_code,
-                            marker_type = marker_type,
-                            offset = token_count,
-                            size = marker_sizes[marker_type])
+            m = MarkerInfo(code=base_code,
+                           marker_type=marker_type,
+                           offset=token_count,
+                           size=marker_sizes[marker_type])
             lut[real_code] = m
 
             base_code += 1
 
     return lut
 
-marker_luts = { "dev": { "A": create_marker_lut(0, marker_group_counts["dev"]),
-                         "B": create_marker_lut(0, marker_group_counts["dev"]) },
-                "comp": { "A": create_marker_lut(100, marker_group_counts["comp"]),
-                          "B": create_marker_lut(150, marker_group_counts["comp"]) } }
 
-MarkerBase = namedtuple( "Marker", "info timestamp res vertices centre orientation" ) 
+marker_luts = {
+    "dev": {"A": create_marker_lut(0, marker_group_counts["dev"]),
+            "B": create_marker_lut(0, marker_group_counts["dev"])},
+    "comp": {"A": create_marker_lut(100, marker_group_counts["comp"]),
+             "B": create_marker_lut(150, marker_group_counts["comp"])}
+}
+
+MarkerBase = namedtuple("Marker", "info timestamp res vertices centre orientation")
+
+
 class Marker(MarkerBase):
-    def __init__( self, *a, **kwd ):
+    def __init__(self, *a, **kwd):
         # Aliases
         self.dist = self.centre.polar.length
         self.rot_y = self.centre.polar.rot_y
+
 
 class Timer(object):
     def __enter__(self):
@@ -127,9 +140,10 @@ class Timer(object):
         self.time = time.time() - self.start
         return False
 
+
 class Vision(object):
     # Resolution defaults to 800x600
-    def __init__(self, camdev, lib, res=(800,600)):
+    def __init__(self, camdev, lib, res=(800, 600)):
         self.koki = pykoki.PyKoki(lib)
         self._camdev = camdev
         self.camera = self.koki.open_camera(self._camdev)
@@ -145,7 +159,7 @@ class Vision(object):
         self._buffers = None
         self._streaming = False
 
-        self._set_res( res )
+        self._set_res(res)
         self._start()
         self.lock.release()
 
@@ -160,8 +174,8 @@ class Vision(object):
             match = vendor_product_re.match(line)
             id = tuple(int(x, 16) for x in match.groups())
             if id in focal_length_lut:
-               self.camera_focal_length = focal_length_lut[id]
-               return
+                self.camera_focal_length = focal_length_lut[id]
+                return
 
     def _set_res(self, res):
         """Set the resolution of the camera if different to what we were"""
@@ -177,7 +191,7 @@ class Vision(object):
         del self.camera
         self.camera = self.koki.open_camera(self._camdev)
 
-        self.camera.format = self.koki.v4l_create_YUYV_format( res[0], res[1] )
+        self.camera.format = self.koki.v4l_create_YUYV_format(res[0], res[1])
 
         fmt = self.camera.format
         width = fmt.fmt.pix.width
@@ -186,7 +200,7 @@ class Vision(object):
         actual = (width, height)
 
         if res != actual:
-            raise ValueError( "Unsupported image resolution {0} (got: {1})".format(res, actual) )
+            raise ValueError("Unsupported image resolution {0} (got: {1})".format(res, actual))
         self._res = actual
 
         if was_streaming:
@@ -222,21 +236,21 @@ class Vision(object):
         times["cam"] = timer.time
 
         with timer:
-            img = self.koki.v4l_YUYV_frame_to_grayscale_image( frame, self._res[0], self._res[1] )
+            img = self.koki.v4l_YUYV_frame_to_grayscale_image(frame, self._res[0], self._res[1])
         times["yuyv"] = timer.time
 
         # Now that we're dealing with a copy of the image, release the camera lock
         self.lock.release()
 
-        params = CameraParams( Point2Df( self._res[0]/2,
-                                         self._res[1]/2 ),
-                               Point2Df( *self.camera_focal_length[ self._res ] ),
-                               Point2Di( *self._res ) )
+        params = CameraParams(Point2Df(self._res[0]/2,
+                                       self._res[1]/2),
+                              Point2Df(*self.camera_focal_length[self._res]),
+                              Point2Di(*self._res))
 
         with timer:
-            markers = self.koki.find_markers_fp( img,
-                                                 functools.partial( self._width_from_code, marker_luts[mode][arena] ),
-                                                 params )
+            markers = self.koki.find_markers_fp(img,
+                                                functools.partial(self._width_from_code, marker_luts[mode][arena]),
+                                                params)
         times["find_markers"] = timer.time
 
         srmarkers = []
@@ -249,38 +263,38 @@ class Vision(object):
 
             vertices = []
             for v in m.vertices:
-                vertices.append( Point( image = ImageCoord( x = v.image.x,
-                                                            y = v.image.y ),
-                                        world = WorldCoord( x = v.world.x,
-                                                            y = v.world.y,
-                                                            z = v.world.z ),
-                                        # libkoki does not yet provide these coords
-                                        polar = PolarCoord( 0,0,0 ) ) )
+                vertices.append(Point(image=ImageCoord(x=v.image.x,
+                                                       y=v.image.y),
+                                      world=WorldCoord(x=v.world.x,
+                                                       y=v.world.y,
+                                                       z=v.world.z),
+                                      # libkoki does not yet provide these coords
+                                      polar=PolarCoord(0, 0, 0)))
 
             num_quarter_turns = int(m.rotation_offset / 90)
             num_quarter_turns %= 4
 
             vertices = vertices[num_quarter_turns:] + vertices[:num_quarter_turns]
 
-            centre = Point( image = ImageCoord( x = m.centre.image.x,
-                                                y = m.centre.image.y ),
-                            world = WorldCoord( x = m.centre.world.x,
-                                                y = m.centre.world.y,
-                                                z = m.centre.world.z ),
-                            polar = PolarCoord( length = m.distance,
-                                                rot_x = m.bearing.x,
-                                                rot_y = m.bearing.y ) )
+            centre = Point(image=ImageCoord(x=m.centre.image.x,
+                                            y=m.centre.image.y),
+                           world=WorldCoord(x=m.centre.world.x,
+                                            y=m.centre.world.y,
+                                            z=m.centre.world.z),
+                           polar=PolarCoord(length=m.distance,
+                                            rot_x=m.bearing.x,
+                                            rot_y=m.bearing.y))
 
-            orientation = Orientation( rot_x = m.rotation.x,
-                                       rot_y = m.rotation.y,
-                                       rot_z = m.rotation.z )
+            orientation = Orientation(rot_x=m.rotation.x,
+                                      rot_y=m.rotation.y,
+                                      rot_z=m.rotation.z)
 
-            marker = Marker( info = info,
-                             timestamp = acq_time,
-                             res = res,
-                             vertices = vertices,
-                             centre = centre,
-                             orientation = orientation )
+            marker = Marker(info=info,
+                            timestamp=acq_time,
+                            res=res,
+                            vertices=vertices,
+                            centre=centre,
+                            orientation=orientation)
             srmarkers.append(marker)
 
         self.koki.image_free(img)

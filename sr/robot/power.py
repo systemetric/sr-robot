@@ -25,6 +25,7 @@ class Battery(object):
         current, voltage = struct.unpack("ii", result)
         return voltage, current
 
+
 class Outputs(object):
     def __init__(self, handle):
         self.handle = handle
@@ -62,7 +63,7 @@ class Power:
     CMD_READ_batt = 7
     CMD_READ_button = 8
 
-    def __init__(self, path, busnum, devnum, serialnum = None):
+    def __init__(self, path, busnum, devnum, serialnum=None):
         self.serialnum = serialnum
 
         self.ctx = usb1.USBContext()
@@ -78,7 +79,7 @@ class Power:
         self.output = Outputs(self.handle)
 
     def __repr__(self):
-        return "Power( serialnum = \"{0}\" )".format( self.serialnum )
+        return "Power( serialnum = \"{0}\" )".format(self.serialnum)
 
     def set_run_led(self, status):
         if status:

@@ -11,7 +11,8 @@ INPUT_PULLUP = "INPUT_PULLUP"
 
 COMMAND_RETRIES = 10
 
-logger = logging.getLogger( "sr.ruggeduino" )
+logger = logging.getLogger("sr.ruggeduino")
+
 
 class IgnoredRuggeduino(object):
     def __init__(self, path, serialnum):
@@ -19,7 +20,8 @@ class IgnoredRuggeduino(object):
         self.serialnum = serialnum
 
     def __repr__(self):
-        return "IgnoredRuggeduino( serialnum = \"{0}\" )".format( self.serialnum )
+        return "IgnoredRuggeduino( serialnum = \"{0}\" )".format(self.serialnum)
+
 
 class RuggeduinoCmdBase(object):
     """Base class for talking to a Ruggeduino that supports the SR command protocol"""
@@ -53,7 +55,7 @@ class RuggeduinoCmdBase(object):
             if len(res) > 0 and res[-1] == "\n":
                 return res
         raise Exception("Communications with Ruggeduino failed for "
-                      + "command '{0}'.".format(command))
+                        + "command '{0}'.".format(command))
 
     def firmware_version_read(self):
         """Read the firmware version from the device"""
@@ -61,14 +63,15 @@ class RuggeduinoCmdBase(object):
         with self.lock:
             return self.command('v')
 
+
 class Ruggeduino(RuggeduinoCmdBase):
     """Class for talking to a Ruggeduino flashed with the SR firmware"""
-    def __init__(self, path, serialnum = None):
+    def __init__(self, path, serialnum=None):
         RuggeduinoCmdBase.__init__(self, path)
         self.serialnum = serialnum
 
         if not self._is_srduino():
-            logger.warning( "Ruggeduino is not running the SR firmware" )
+            logger.warning("Ruggeduino is not running the SR firmware")
 
     def _is_srduino(self):
         """Determine if the board is flashed with the SR firmware"""
@@ -109,4 +112,4 @@ class Ruggeduino(RuggeduinoCmdBase):
         return (int(response)/1023.0)*5.0
 
     def __repr__(self):
-        return "Ruggeduino( serialnum = \"{0}\" )".format( self.serialnum )
+        return "Ruggeduino( serialnum = \"{0}\" )".format(self.serialnum)
