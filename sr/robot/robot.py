@@ -322,7 +322,7 @@ class Robot(object):
                     break
 
         if libpath is None:
-            v = vision.Vision("/usr/lib")
+            v = vision.Vision("/usr/local/lib")
         else:
             v = vision.Vision(libpath)
 
