@@ -1,51 +1,21 @@
 import threading
 import time
 import functools
+import io
 import re
 import subprocess
 from collections import namedtuple
 
+import cv2
+import numpy as np
+import picamera
+
 import pykoki
 from pykoki import CameraParams, Point2Df, Point2Di
 
-C500_focal_length = {
-    (1280, 1024): (1088.6744696128017, 1088.6744696128017),
-    (1280, 800): (1077.3190248161634, 1077.3190248161634),
-    (1280, 720): (1087.9702553611371, 1087.9702553611371),
-    (960, 720): (810.09860332369828, 810.09860332369828),
-    (800, 600): (672.49473805241894, 672.49473805241894),
-    (640, 480): (539.30891554396362, 539.30891554396362),
-    (640, 400): (536.63303379131355, 536.63303379131355),
-    (640, 360): (538.60066822927899, 538.60066822927899),
-    (352, 288): (302.3574089608714, 302.3574089608714),
-    (320, 240): (267.87289797043974, 267.87289797043974),
-    (176, 144): (145.6217107354399, 145.6217107354399),
-    (160, 120): (129.71444255178932, 129.71444255178932)
-}
-
-C270_focal_length = {
-    (1280, 960): (1402.4129693403379, 1402.4129693403379),
-    (1280, 720): (1403.6700720661784, 1403.6700720661784),
-    (1024, 576): (1124.3241302755343, 1124.3241302755343),
-    (960, 720):  (1051.3506745692532, 1051.3506745692532),
-    (960, 544):  (1050.6160916576887, 1050.6160916576887),
-    (864, 480):  (940.64475443969184, 940.64475443969184),
-    (800, 600):  (870.49134233524376, 870.49134233524376),
-    (800, 448):  (870.24502453110301, 870.24502453110301),
-    (752, 416):  (813.03563104383659, 813.03563104383659),
-    (640, 480):  (793.97214065079106, 793.97214065079106),
-    (544, 288):  (593.33938236047481, 593.33938236047481),
-    (432, 240):  (473.402174937062,   473.402174937062),
-    (352, 288):  (416.51679809127182, 416.51679809127182),
-    (320, 240):  (396.10516141661941, 396.10516141661941),
-    (320, 176):  (339.97100058087398, 339.97100058087398),
-    (176, 144):  (204.85920172232522, 204.85920172232522),
-    (160, 120):  (195.20341230615605, 195.20341230615605)
-}
-
-focal_length_lut = {
-    (0x046d, 0x0807): C500_focal_length,
-    (0x046d, 0x0825): C270_focal_length
+# TODO: real values for this!
+picamera_focal_lengths = {
+    (1920, 1080): (1402.4129693403379, 1402.4129693403379),
 }
 
 MARKER_ARENA, MARKER_ROBOT, MARKER_TOKEN_A, MARKER_TOKEN_B, MARKER_TOKEN_C = 'arena', 'robot', 'token-a', 'token-b', 'token-c'
@@ -142,78 +112,31 @@ class Timer(object):
 
 
 class Vision(object):
-    # Resolution defaults to 800x600
-    def __init__(self, camdev, lib, res=(800, 600)):
+    def __init__(self, lib, res=(1920, 1080)):
         self.koki = pykoki.PyKoki(lib)
-        self._camdev = camdev
-        self.camera = self.koki.open_camera(self._camdev)
-
-        self.camera_focal_length = None
-        self._init_focal_length()
+        self.camera = picamera.PiCamera(resolution=res)
 
         # Lock for the use of the vision
         self.lock = threading.Lock()
-        self.lock.acquire()
-
-        self._res = None
-        self._buffers = None
-        self._streaming = False
-
-        self._set_res(res)
-        self._start()
-        self.lock.release()
 
     def __del__(self):
-        self._stop()
-
-    def _init_focal_length(self):
-        vendor_product_re = re.compile(".* ([0-9A-Za-z]+):([0-9A-Za-z]+) ")
-        p = subprocess.Popen(["lsusb"], stdout=subprocess.PIPE, universal_newlines=True)
-        stdout, _ = p.communicate()
-        for line in stdout.splitlines():
-            match = vendor_product_re.match(line)
-            id = tuple(int(x, 16) for x in match.groups())
-            if id in focal_length_lut:
-                self.camera_focal_length = focal_length_lut[id]
-                return
+        self.camera.close()
 
     def _set_res(self, res):
         """Set the resolution of the camera if different to what we were"""
-        if res == self._res:
+        if res == self.camera.resolution:
             # Resolution already the requested one
             return
 
-        was_streaming = self._streaming
-        if was_streaming:
-            self._stop()
+        try:
+            self.camera.resolution = res
+        except Exception as e:
+            raise ValueError("Setting camera resolution failed with {}".format(type(e)))
 
-        # The camera goes into a strop if we don't close and open again
-        del self.camera
-        self.camera = self.koki.open_camera(self._camdev)
-
-        self.camera.format = self.koki.v4l_create_YUYV_format(res[0], res[1])
-
-        fmt = self.camera.format
-        width = fmt.fmt.pix.width
-        height = fmt.fmt.pix.height
-
-        actual = (width, height)
+        actual = self.camera.resolution
 
         if res != actual:
             raise ValueError("Unsupported image resolution {0} (got: {1})".format(res, actual))
-        self._res = actual
-
-        if was_streaming:
-            self._start()
-
-    def _stop(self):
-        self.camera.stop_stream()
-        self._streaming = False
-
-    def _start(self):
-        self.camera.prepare_buffers(1)
-        self.camera.start_stream()
-        self._streaming = True
 
     def _width_from_code(self, lut, code):
         if code not in lut:
@@ -231,24 +154,36 @@ class Vision(object):
         timer = Timer()
         times = {}
 
-        with timer:
-            frame = self.camera.get_frame()
-        times["cam"] = timer.time
+        stream = io.BytesIO()
 
         with timer:
-            img = self.koki.v4l_YUYV_frame_to_grayscale_image(frame, self._res[0], self._res[1])
-        times["yuyv"] = timer.time
+            self.camera.capture(stream, format="jpeg")
+        times["cam"] = timer.time
+
+        # Turn the stream of bytes into a NumPy array.
+        jpeg_data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+        # Decode the image from JPEG to a 2D NumPy array.
+        # `0` for the second argument indicates that the result should be greyscale.
+        image = cv2.imdecode(jpeg_data, 0)
+        # Create an IplImage header for the image.
+        # (width, height), depth, num_channels
+        ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
+        # Put the actual image data in the IplImage.
+        # The third argument is the row length ("step").
+        cv2.cv.SetData(ipl_image, image.tobytes(), image.dtype.itemsize * image.shape[1])
+        # Make sure the image data is actually in the IplImage. Don't touch this line!
+        ipl_image.tostring()
 
         # Now that we're dealing with a copy of the image, release the camera lock
         self.lock.release()
 
-        params = CameraParams(Point2Df(self._res[0]/2,
-                                       self._res[1]/2),
-                              Point2Df(*self.camera_focal_length[self._res]),
-                              Point2Di(*self._res))
+        params = CameraParams(Point2Df(self.camera.resolution[0] / 2,
+                                       self.camera.resolution[1] / 2),
+                              Point2Df(*picamera_focal_lengths[self.camera.resolution]),
+                              Point2Di(*self.camera.resolution))
 
         with timer:
-            markers = self.koki.find_markers_fp(img,
+            markers = self.koki.find_markers_fp(ipl_image,
                                                 functools.partial(self._width_from_code, marker_luts[mode][arena]),
                                                 params)
         times["find_markers"] = timer.time
@@ -297,7 +232,7 @@ class Vision(object):
                             orientation=orientation)
             srmarkers.append(marker)
 
-        self.koki.image_free(img)
+        self.koki.image_free(ipl_image)  # TODO: is this line needed?
 
         if stats:
             return (srmarkers, times)

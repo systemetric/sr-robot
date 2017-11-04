@@ -311,17 +311,6 @@ class Robot(object):
         return srdevs
 
     def _init_vision(self):
-        udev = pyudev.Context()
-        cams = list(udev.list_devices(subsystem="video4linux",
-                                      # For now, find devices that use this driver
-                                      ID_USB_DRIVER="uvcvideo"))
-
-        if len(cams) == 0:
-            # Camera isn't connected.
-            return
-
-        camdev = cams[0].device_node
-
         # Find libkoki.so:
         libpath = None
         if "LD_LIBRARY_PATH" in os.environ:
@@ -333,9 +322,9 @@ class Robot(object):
                     break
 
         if libpath is None:
-            v = vision.Vision(camdev, "/usr/lib")
+            v = vision.Vision("/usr/lib")
         else:
-            v = vision.Vision(camdev, libpath)
+            v = vision.Vision(libpath)
 
         self.vision = v
 
