@@ -145,9 +145,10 @@ class Vision(object):
 
         return lut[code].size
 
-    def see(self, mode, arena, res, stats):
+    def see(self, mode, arena, res=None, stats=False):
         self.lock.acquire()
-        self._set_res(res)
+        if res is not None:
+            self._set_res(res)
 
         acq_time = time.time()
 

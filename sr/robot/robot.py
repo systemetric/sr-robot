@@ -328,7 +328,7 @@ class Robot(object):
 
         self.vision = v
 
-    def see(self, res=(800, 600), stats=False):
+    def see(self, res=(1920, 1080), stats=False):
         if not hasattr(self, "vision"):
             raise NoCameraPresent()
 
