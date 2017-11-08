@@ -113,8 +113,11 @@ class Timer(object):
 
 
 class Vision(object):
-    def __init__(self, lib, res=(1920, 1080)):
-        self.koki = pykoki.PyKoki(lib)
+    def __init__(self, lib=None, res=(1920, 1080)):
+        if lib is not None:
+            self.koki = pykoki.PyKoki(lib)
+        else:
+            self.koki = pykoki.PyKoki()
         self.camera = picamera.PiCamera(resolution=res)
 
         # Lock for the use of the vision
