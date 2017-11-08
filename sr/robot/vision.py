@@ -13,10 +13,36 @@ import picamera
 import pykoki
 from pykoki import CameraParams, Point2Df, Point2Di
 
-# TODO: real values for this!
+# TODO: work out which of these actually work/are useful.
 picamera_focal_lengths = {
-    (1920, 1080): (1402.4129693403379, 1402.4129693403379),
+    (1920, 1080): None,
+    (1280, 1024): None,
+    (1280, 800): None,
+    (1280, 720): None,
+    (960, 720): None,
+    (800, 600): None,
+    (640, 480): None,
+    (640, 400): None,
+    (640, 360): None,
+    (352, 288): None,
+    (320, 240): None,
+    (176, 144): None,
+    (160, 120): None,
 }
+
+# Source: <https://elinux.org/Rpi_Camera_Module#Technical_Parameters_.28v.2_board.29>
+FOCAL_LENGTH_MM = 4.0
+SENSOR_WIDTH_MM = 3.674
+SENSOR_HEIGHT_MM = 2.760
+
+# TODO: more accurate values for this!
+# Currently just an estimate based on a formula found at
+# <http://answers.opencv.org/question/17076/conversion-focal-distance-from-mm-to-pixels/?answer=17180#post-id-17180>
+for res in picamera_focal_lengths:
+    # focal length in px = (focal length in mm / sensor width in mm) * image width in px
+    focal_length_px_x = (FOCAL_LENGTH_MM / SENSOR_WIDTH_MM) * res[0]
+    focal_length_px_y = (FOCAL_LENGTH_MM / SENSOR_HEIGHT_MM) * res[1]
+    picamera_focal_lengths[res] = (focal_length_px_x, focal_length_px_y)
 
 MARKER_ARENA, MARKER_TOKEN, MARKER_BUCKET_SIDE, MARKER_BUCKET_END = 'arena', 'token', 'bucket-side', 'bucket-end'
 
