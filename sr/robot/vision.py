@@ -18,27 +18,24 @@ picamera_focal_lengths = {
     (1920, 1080): (1402.4129693403379, 1402.4129693403379),
 }
 
-MARKER_ARENA, MARKER_ROBOT, MARKER_TOKEN_A, MARKER_TOKEN_B, MARKER_TOKEN_C = 'arena', 'robot', 'token-a', 'token-b', 'token-c'
+MARKER_ARENA, MARKER_TOKEN, MARKER_BUCKET_SIDE, MARKER_BUCKET_END = 'arena', 'token', 'bucket-side', 'bucket-end'
 
 marker_offsets = {
     MARKER_ARENA: 0,
-    MARKER_ROBOT: 28,
+    MARKER_TOKEN: 32,
+    MARKER_BUCKET_SIDE: 72,
+    MARKER_BUCKET_END: 76,
 }
-MARKER_TOKEN_OFFSET = 32
 
+# The numbers here (e.g. `0.25`) are in metres -- the 10/12 is a scaling factor
+# so that libkoki gets the size of the 10x10 black/white portion (not including
+# the white border), but so that humans can measure sizes including the border.
 marker_sizes = {
     MARKER_ARENA: 0.25 * (10.0/12),
-    MARKER_ROBOT: 0.1 * (10.0/12),
-    MARKER_TOKEN_A: 0.2 * (10.0/12),
-    MARKER_TOKEN_B: 0.2 * (10.0/12),
-    MARKER_TOKEN_C: 0.2 * (10.0/12)
+    MARKER_TOKEN: 0.1 * (10.0/12),
+    MARKER_BUCKET_SIDE: 0.1 * (10.0/12),
+    MARKER_BUCKET_END: 0.1 * (10.0/12),
 }
-
-token_counts = [
-    (MARKER_TOKEN_A, 4),
-    (MARKER_TOKEN_B, 4),
-    (MARKER_TOKEN_C, 1)
-]
 
 MarkerInfo = namedtuple("MarkerInfo", "code marker_type offset size")
 ImageCoord = namedtuple("ImageCoord", "x y")
@@ -49,40 +46,44 @@ Point = namedtuple("Point", "image world polar")
 
 # Number of markers per group
 marker_group_counts = {
-    "dev": [(MARKER_ARENA, 28),
-            (MARKER_ROBOT, 4)],
-    "comp": [(MARKER_ARENA, 28),
-             (MARKER_ROBOT, 4)],
+    "dev": [(MARKER_ARENA, 24),
+            (MARKER_TOKEN, 40),
+            (MARKER_BUCKET_SIDE, 4),
+            (MARKER_BUCKET_END, 4)],
+    "comp": [(MARKER_ARENA, 24),
+             (MARKER_TOKEN, 40),
+             (MARKER_BUCKET_SIDE, 4),
+             (MARKER_BUCKET_END, 4)],
 }
 
 
 def create_marker_lut(offset, counts):
     lut = {}
-    for genre, num in counts:
-        for n in range(0, num):
-            base_code = marker_offsets[genre] + n
+    for marker_type, num_markers in counts:
+        for n in range(0, num_markers):
+            base_code = marker_offsets[marker_type] + n
             real_code = offset + base_code
-            m = MarkerInfo(code=base_code,
-                           marker_type=genre,
-                           offset=n,
-                           size=marker_sizes[genre])
-            lut[real_code] = m
-
-    # Now add on the token markers
-    base_code = MARKER_TOKEN_OFFSET
-    for marker_type, count in token_counts:
-        for token_count in range(count):
-            real_code = offset + base_code
-
             m = MarkerInfo(code=base_code,
                            marker_type=marker_type,
-                           offset=token_count,
+                           offset=n,
                            size=marker_sizes[marker_type])
             lut[real_code] = m
-
-            base_code += 1
-
     return lut
+
+
+# 0: arena
+# ...
+# 23: arena
+# [24-31 undefined]
+# 32: token
+# ...
+# 71: token
+# 72: bucket side
+# ...
+# 75: bucket side
+# 76: bucket end
+# ...
+# 79: bucket end
 
 
 marker_luts = {
