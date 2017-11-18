@@ -7,6 +7,9 @@ import glob
 import logging
 
 import pyudev
+import smbus
+
+from sr.robot.ThunderBorg import ThunderBorgBoard, BlackJackBoardPWM, BlackJackBoardGPIO
 
 from sr.robot import motor, power, ruggeduino, vision, servo
 
@@ -82,6 +85,9 @@ class Robot(object):
         self._ruggeduino_id_handlers = {}
         self._ruggeduino_fwver_handlers = {"SRduino": ruggeduino.Ruggeduino}
 
+        bus = smbus.SMBus(1)
+        self.gpio = BlackJackBoardGPIO(bus)
+
         if init:
             self.init()
             self.wait_start()
@@ -111,6 +117,10 @@ class Robot(object):
 
         self._initialised = True
 
+    def off(self):
+        for motor in self.motors:
+            motor.off()
+
     def _acquire_syslock(self):
         try:
             # Create the file
@@ -123,8 +133,6 @@ class Robot(object):
         logger.info("Found the following devices:")
 
         self._dump_power()
-        self._dump_usbdev_dict(self.motors, "Motors")
-        self._dump_usbdev_dict(self.servos, "Servos")
         self._dump_usbdev_dict(self.ruggeduinos, "Ruggeduinos")
         self._dump_webcam()
 
@@ -239,10 +247,15 @@ class Robot(object):
             self.power = None
 
     def _init_motors(self):
-        self.motors = self._init_usb_devices("MCV4B", motor.Motor, subsystem="tty")
+        self.motors = [
+            ThunderBorgBoard(0x14),
+            ThunderBorgBoard(0x15),
+            ThunderBorgBoard(0x16),
+            ThunderBorgBoard(0x17)
+        ]
 
     def _init_servos(self):
-        self.servos = self._init_usb_devices("Servo_Board_v4", servo.Servo)
+        self.servos = BlackJackBoardPWM(bus)
 
     def _init_ruggeduinos(self):
         self.ruggeduinos = {}
