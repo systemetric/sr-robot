@@ -14,8 +14,9 @@ import pykoki
 from pykoki import CameraParams, Point2Df, Point2Di
 
 # TODO: work out which of these actually work/are useful.
-picamera_focal_lengths = {
-    (1920, 1080): None,
+# TODO: more accurate values for these.
+picamera_focal_lengths = {  # fx, fy tuples
+    (1920, 1080): (1531.83768, 1533.75572),  # Reprojection error: 0.35
     (1280, 1024): None,
     (1280, 800): None,
     (1280, 720): None,
@@ -35,14 +36,16 @@ FOCAL_LENGTH_MM = 4.0
 SENSOR_WIDTH_MM = 3.674
 SENSOR_HEIGHT_MM = 2.760
 
-# TODO: more accurate values for this!
-# Currently just an estimate based on a formula found at
+# Estimate focal lengths for resolutions we don't have a focal length for.
+# These aren't particularly accurate; the estimate for 1920x1080 caused a
+# length of 50 cm to be reported as 60 cm.
 # <http://answers.opencv.org/question/17076/conversion-focal-distance-from-mm-to-pixels/?answer=17180#post-id-17180>
 for res in picamera_focal_lengths:
-    # focal length in px = (focal length in mm / sensor width in mm) * image width in px
-    focal_length_px_x = (FOCAL_LENGTH_MM / SENSOR_WIDTH_MM) * res[0]
-    focal_length_px_y = (FOCAL_LENGTH_MM / SENSOR_HEIGHT_MM) * res[1]
-    picamera_focal_lengths[res] = (focal_length_px_x, focal_length_px_y)
+    if picamera_focal_lengths[res] is None:
+        # focal length in px = (focal length in mm / sensor width in mm) * image width in px
+        focal_length_px_x = (FOCAL_LENGTH_MM / SENSOR_WIDTH_MM) * res[0]
+        focal_length_px_y = (FOCAL_LENGTH_MM / SENSOR_HEIGHT_MM) * res[1]
+        picamera_focal_lengths[res] = (focal_length_px_x, focal_length_px_y)
 
 MARKER_ARENA, MARKER_TOKEN, MARKER_BUCKET_SIDE, MARKER_BUCKET_END = 'arena', 'token', 'bucket-side', 'bucket-end'
 
