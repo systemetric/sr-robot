@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# coding: latin-1
+# encoding: utf-8
 
 import ThunderBorg
 import smbus
