@@ -119,8 +119,8 @@ class BlackJackBoardGPIO(object):
         self._pin_map = {
             1: 1,
             2: 2,
-            3: 3,
-            4: 4
+            3: 4,
+            4: 3,
         }
 
     def pin_mode(self, pin, mode):
