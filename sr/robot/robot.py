@@ -9,7 +9,7 @@ import logging
 import pyudev
 import smbus
 
-from sr.robot.ThunderBorg import ThunderBorgBoard, BlackJackBoardPWM, BlackJackBoardGPIO
+from sr.robot.thunderborg import ThunderBorgBoard, BlackJackBoardPWM, BlackJackBoardGPIO
 
 from sr.robot import motor, power, ruggeduino, vision, servo
 
