@@ -89,7 +89,7 @@ class Robot(object):
         self.gpio = BlackJackBoardGPIO(bus)
 
         if init:
-            self.init()
+            self.init(bus)
             self.wait_start()
 
     @classmethod
@@ -103,13 +103,13 @@ class Robot(object):
                    # Logging is already configured
                    config_logging=False)
 
-    def init(self):
+    def init(self, bus):
         # Find and initialise hardware
         if self._initialised:
             raise AlreadyInitialised()
 
         logger.info("Initialising hardware.")
-        self._init_devs()
+        self._init_devs(bus)
         self._init_vision()
 
         if not self._quiet:
@@ -221,7 +221,7 @@ class Robot(object):
         logger.debug("Ruggeduino ID '%s' set to be ignored", r_id)
         self.ruggeduino_set_handler_by_id(r_id, ruggeduino.IgnoredRuggeduino)
 
-    def _init_devs(self):
+    def _init_devs(self, bus):
         """Initialise the attributes for accessing devices"""
 
         # Power board
@@ -229,7 +229,7 @@ class Robot(object):
         # Motor boards
         self._init_motors()
         # Servo boards
-        self._init_servos()
+        self._init_servos(bus)
         # Ruggeduinos
         self._init_ruggeduinos()
 
@@ -254,7 +254,7 @@ class Robot(object):
             ThunderBorgBoard(0x17)
         ]
 
-    def _init_servos(self):
+    def _init_servos(self, bus):
         self.servos = BlackJackBoardPWM(bus)
 
     def _init_ruggeduinos(self):
