@@ -11,7 +11,7 @@ import smbus
 
 from sr.robot.thunderborg import ThunderBorgBoard, BlackJackBoardPWM, BlackJackBoardGPIO
 
-from sr.robot import motor, power, ruggeduino, vision, servo
+from sr.robot import power, ruggeduino, vision
 
 logger = logging.getLogger("sr.robot")
 

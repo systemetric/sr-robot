@@ -2,7 +2,6 @@
 # encoding: utf-8
 
 import ThunderBorg
-import smbus
 
 B_I2C_ADR = 0x08
 

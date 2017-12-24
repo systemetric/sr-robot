@@ -2,8 +2,6 @@ import threading
 import time
 import functools
 import io
-import re
-import subprocess
 from collections import namedtuple
 
 import cv2
