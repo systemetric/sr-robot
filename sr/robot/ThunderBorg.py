@@ -308,10 +308,10 @@ class ThunderBorg:
                     self.Print('Found a device at %02X, but it is not a ThunderBorg (ID %02X instead of %02X)' % (self.i2cAddress, i2cRecv[1], I2C_ID_THUNDERBORG))
             else:
                 self.foundChip = False
-                self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
+                # self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
         except Exception:
             self.foundChip = False
-            self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
+            # self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
 
         # See if we are missing chips
         # if not self.foundChip:
