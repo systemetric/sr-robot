@@ -168,7 +168,7 @@ class Vision(object):
 
         return lut[code].size
 
-    def see(self, mode, arena, res=None, stats=False, save=True):
+    def see(self, mode, arena, res=None, stats=False, save=True, fast_capture=True):
         self.lock.acquire()
         if res is not None:
             self._set_res(res)
@@ -181,7 +181,7 @@ class Vision(object):
         stream = io.BytesIO()
 
         with timer:
-            self.camera.capture(stream, format="jpeg")
+            self.camera.capture(stream, format="jpeg", use_video_port=fast_capture)
         times["cam"] = timer.time
 
         # Turn the stream of bytes into a NumPy array.
