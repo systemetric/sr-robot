@@ -14,19 +14,11 @@ from pykoki import CameraParams, Point2Df, Point2Di
 # TODO: work out which of these actually work/are useful.
 # TODO: more accurate values for these.
 picamera_focal_lengths = {  # fx, fy tuples
-    (1920, 1080): (1531.83768, 1533.75572),  # Reprojection error: 0.35
-    (1280, 1024): None,
-    (1280, 800): None,
-    (1280, 720): None,
-    (960, 720): None,
-    (800, 600): None,
-    (640, 480): None,
-    (640, 400): None,
-    (640, 360): None,
-    (352, 288): None,
-    (320, 240): None,
-    (176, 144): None,
-    (160, 120): None,
+    (1920, 1080): (2320.96618182, 2323.87230303),
+    (2592, 1944): (1820.3656323, 1822.644943553),
+    (1296, 972): (1531.83768, 1533.75572),
+    (1296, 730): (1531.83768, 1533.75572),
+    (640, 480): (1531.83768, 1533.75572),
 }
 
 # Source: <https://elinux.org/Rpi_Camera_Module#Technical_Parameters_.28v.2_board.29>
