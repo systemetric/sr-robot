@@ -247,12 +247,13 @@ class Robot(object):
             self.power = None
 
     def _init_motors(self):
-        self.motors = [
-            ThunderBorgBoard(0x14),
-            ThunderBorgBoard(0x15),
-            ThunderBorgBoard(0x16),
-            ThunderBorgBoard(0x17)
-        ]
+        self.motors = {}
+
+        for i, addr in enumerate([0x14, 0x15, 0x16, 0x17]):
+            try:
+                self.motors[i] = ThunderBorgBoard(addr)
+            except Exception:
+                pass
 
     def _init_servos(self, bus):
         self.servos = BlackJackBoardPWM(bus)

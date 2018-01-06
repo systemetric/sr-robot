@@ -64,6 +64,9 @@ class ThunderBorgBoard(object):
         self._tb.i2cAddress = address
         self._tb.Init()
 
+        if not self._tb.foundChip:
+            raise Exception("No ThunderBorg at {}".format(address))
+
         self.m0 = ThunderBorgMotorChannel(self._tb, 0)
         self.m1 = ThunderBorgMotorChannel(self._tb, 1)
         self.led = ThunderBorgLED(self._tb)
