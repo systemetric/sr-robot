@@ -191,7 +191,7 @@ class Vision(object):
             # `0` for the second argument indicates that the result should be greyscale.
             image = cv2.imdecode(jpeg_data, 0)
             if save:
-                cv2.imwrite("/tmp/marker.jpg", image)
+                cv2.imwrite("/root/shepherd/shepherd/static/image.jpg", image)
             # Create an IplImage header for the image.
             # (width, height), depth, num_channels
             ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
