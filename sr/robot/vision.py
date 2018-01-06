@@ -193,8 +193,8 @@ class Vision(object):
             image = cv2.imdecode(jpeg_data, 0)
             if save:
                 cv2.imwrite("/root/shepherd/shepherd/static/image.jpg", image)
-            if os.path.exists('/media/ROBOTUSB/collect_images.txt'):
-                filename = "/media/ROBOTUSB/" + str(int(acq_time)) + ".jpg"
+            if os.path.exists('/media/RobotUSB/collect_images.txt'):
+                filename = "/media/RobotUSB/" + str(int(acq_time)) + ".jpg"
                 cv2.imwrite(filename, image)
             # Create an IplImage header for the image.
             # (width, height), depth, num_channels
@@ -222,9 +222,20 @@ class Vision(object):
         times["find_markers"] = timer.time
 
         srmarkers = []
+
+        usb_log = os.path.exists("/media/RobotUSB/log_markers.txt")
+
+        if markers and usb_log:
+            logfile = open("/media/RobotUSB/" + str(int(acq_time)) + ".txt", "w")
+
         for m in markers:
+            if usb_log:
+                logfile.write("code: {}, distance: {}, rot_x: {}, rot_y: {}\n".format(
+                    m.code, round(m.distance, 3), round(m.bearing.x, 3), round(m.bearing.y, 3)))
             if m.code not in marker_luts[mode][arena]:
                 # Ignore other sets of codes
+                if usb_log:
+                    logfile.write("(last marker not part of competition, ignoring)\n")
                 continue
 
             info = marker_luts[mode][arena][int(m.code)]
@@ -264,6 +275,9 @@ class Vision(object):
                             centre=centre,
                             orientation=orientation)
             srmarkers.append(marker)
+
+        if markers and usb_log:
+            logfile.close()
 
         if stats:
             return (srmarkers, times)
