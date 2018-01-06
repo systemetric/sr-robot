@@ -184,22 +184,24 @@ class Vision(object):
             self.camera.capture(stream, format="jpeg", use_video_port=fast_capture)
         times["cam"] = timer.time
 
-        # Turn the stream of bytes into a NumPy array.
-        jpeg_data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-        # Decode the image from JPEG to a 2D NumPy array.
-        # `0` for the second argument indicates that the result should be greyscale.
-        image = cv2.imdecode(jpeg_data, 0)
-        if save:
-            cv2.imwrite("/tmp/marker.jpg", image)
-        # Create an IplImage header for the image.
-        # (width, height), depth, num_channels
-        ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
-        # Put the actual image data in the IplImage.
-        # The third argument is the row length ("step").
-        # Note that pykoki will automatically free `ipl_image` after the markers are obtained from it.
-        cv2.cv.SetData(ipl_image, image.tobytes(), image.dtype.itemsize * image.shape[1])
-        # Make sure the image data is actually in the IplImage. Don't touch this line!
-        ipl_image.tostring()
+        with timer:
+            # Turn the stream of bytes into a NumPy array.
+            jpeg_data = np.fromstring(stream.getvalue(), dtype=np.uint8)
+            # Decode the image from JPEG to a 2D NumPy array.
+            # `0` for the second argument indicates that the result should be greyscale.
+            image = cv2.imdecode(jpeg_data, 0)
+            if save:
+                cv2.imwrite("/tmp/marker.jpg", image)
+            # Create an IplImage header for the image.
+            # (width, height), depth, num_channels
+            ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
+            # Put the actual image data in the IplImage.
+            # The third argument is the row length ("step").
+            # Note that pykoki will automatically free `ipl_image` after the markers are obtained from it.
+            cv2.cv.SetData(ipl_image, image.tobytes(), image.dtype.itemsize * image.shape[1])
+            # Make sure the image data is actually in the IplImage. Don't touch this line!
+            ipl_image.tostring()
+        times["manipulation"] = timer.time
 
         # Now that we're dealing with a copy of the image, release the camera lock
         self.lock.release()
