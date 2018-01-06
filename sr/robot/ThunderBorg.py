@@ -103,13 +103,7 @@ def ScanForThunderBorg(busNumber=1):
                 if i2cRecv[1] == I2C_ID_THUNDERBORG:
                     print 'Found ThunderBorg at %02X' % (address)
                     found.append(address)
-                else:
-                    pass
-            else:
-                pass
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             pass
     if len(found) == 0:
         print 'No ThunderBorg boards found, is bus #%d correct (should be 0 for Rev 1, 1 for Rev 2)' % (busNumber)
@@ -157,9 +151,7 @@ def SetNewAddress(newAddress, oldAddress=-1, busNumber=1):
         else:
             foundChip = False
             print 'Missing ThunderBorg at %02X' % (oldAddress)
-    except KeyboardInterrupt:
-        raise
-    except:
+    except Exception:
         foundChip = False
         print 'Missing ThunderBorg at %02X' % (oldAddress)
     if foundChip:
@@ -179,9 +171,7 @@ def SetNewAddress(newAddress, oldAddress=-1, busNumber=1):
             else:
                 foundChip = False
                 print 'Missing ThunderBorg at %02X' % (newAddress)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             foundChip = False
             print 'Missing ThunderBorg at %02X' % (newAddress)
     if foundChip:
@@ -319,9 +309,7 @@ class ThunderBorg:
             else:
                 self.foundChip = False
                 self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.foundChip = False
             self.Print('Missing ThunderBorg at %02X' % (self.i2cAddress))
 
@@ -370,9 +358,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(command, [pwm])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending motor 2 drive level!')
 
     def GetMotor2(self):
@@ -387,9 +373,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_B, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading motor 2 drive level!')
             return
 
@@ -427,9 +411,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(command, [pwm])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending motor 1 drive level!')
 
     def GetMotor1(self):
@@ -444,9 +426,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_A, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading motor 1 drive level!')
             return
 
@@ -484,9 +464,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(command, [pwm])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending all motors drive level!')
 
     def MotorsOff(self):
@@ -495,9 +473,7 @@ class ThunderBorg:
         """
         try:
             self.RawWrite(COMMAND_ALL_OFF, [0])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending motors off command!')
 
     def SetLed1(self, r, g, b):
@@ -517,9 +493,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_SET_LED1, [levelR, levelG, levelB])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending colour for the ThunderBorg LED!')
 
     def GetLed1(self):
@@ -535,9 +509,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_LED1, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading ThunderBorg LED colour!')
             return
 
@@ -563,9 +535,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_SET_LED2, [levelR, levelG, levelB])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending colour for the ThunderBorg Lid LED!')
 
     def GetLed2(self):
@@ -581,9 +551,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_LED2, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading ThunderBorg Lid LED colour!')
             return
 
@@ -609,9 +577,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_SET_LEDS, [levelR, levelG, levelB])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending colour for both LEDs!')
 
     def SetLedShowBattery(self, state):
@@ -632,9 +598,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_SET_LED_BATT_MON, [level])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending LED battery monitoring state!')
 
     def GetLedShowBattery(self):
@@ -650,9 +614,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_LED_BATT_MON, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading LED battery monitoring state!')
             return
 
@@ -681,9 +643,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_SET_FAILSAFE, [level])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending communications failsafe state!')
 
     def GetCommsFailsafe(self):
@@ -696,9 +656,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_FAILSAFE, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading communications failsafe state!')
             return
 
@@ -746,9 +704,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_DRIVE_A_FAULT, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading the drive fault state for motor #1!')
             return
 
@@ -764,9 +720,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_DRIVE_B_FAULT, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading the drive fault state for motor #2!')
             return
 
@@ -784,9 +738,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_BATT_VOLT, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading battery level!')
             return
 
@@ -814,9 +766,7 @@ class ThunderBorg:
         try:
             self.RawWrite(COMMAND_SET_BATT_LIMITS, [levelMin, levelMax])
             time.sleep(0.2)  # Wait for EEPROM write to complete
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending battery monitoring limits!')
 
     def GetBatteryMonitoringLimits(self):
@@ -829,9 +779,7 @@ class ThunderBorg:
         """
         try:
             i2cRecv = self.RawRead(COMMAND_GET_BATT_LIMITS, I2C_MAX_LEN)
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed reading battery monitoring limits!')
             return
 
@@ -864,9 +812,7 @@ class ThunderBorg:
 
         try:
             self.RawWrite(COMMAND_WRITE_EXTERNAL_LED, [b0, b1, b2, b3])
-        except KeyboardInterrupt:
-            raise
-        except:
+        except Exception:
             self.Print('Failed sending word for the external LEDs!')
 
     def SetExternalLedColours(self, colours):
