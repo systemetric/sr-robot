@@ -335,7 +335,7 @@ class Robot(object):
                     break
 
         if libpath is None:
-            v = vision.Vision()
+            v = vision.Vision("/root/libkoki/lib")
         else:
             v = vision.Vision(libpath)
 
