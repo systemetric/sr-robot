@@ -341,11 +341,12 @@ class Robot(object):
 
         self.vision = v
 
-    def see(self, res=(1920, 1080), stats=False):
+    def see(self, res=(1920, 1080), stats=False, save=True):
         if not hasattr(self, "vision"):
             raise NoCameraPresent()
 
         return self.vision.see(res=res,
                                mode=self.mode,
                                arena=self.arena,
-                               stats=stats)
+                               stats=stats,
+                               save=save)

@@ -168,7 +168,7 @@ class Vision(object):
 
         return lut[code].size
 
-    def see(self, mode, arena, res=None, stats=False):
+    def see(self, mode, arena, res=None, stats=False, save=True):
         self.lock.acquire()
         if res is not None:
             self._set_res(res)
@@ -189,7 +189,8 @@ class Vision(object):
         # Decode the image from JPEG to a 2D NumPy array.
         # `0` for the second argument indicates that the result should be greyscale.
         image = cv2.imdecode(jpeg_data, 0)
-        cv2.imwrite("/tmp/marker.jpg", image)
+        if save:
+            cv2.imwrite("/tmp/marker.jpg", image)
         # Create an IplImage header for the image.
         # (width, height), depth, num_channels
         ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
