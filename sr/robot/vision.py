@@ -2,6 +2,7 @@ import threading
 import time
 import functools
 import io
+import os
 from collections import namedtuple
 
 import cv2
@@ -192,6 +193,9 @@ class Vision(object):
             image = cv2.imdecode(jpeg_data, 0)
             if save:
                 cv2.imwrite("/root/shepherd/shepherd/static/image.jpg", image)
+            if os.path.exists('/media/ROBOTUSB/collect_images.txt'):
+                filename = "/media/ROBOTUSB/" + str(int(acq_time)) + ".jpg"
+                cv2.imwrite(filename, image)
             # Create an IplImage header for the image.
             # (width, height), depth, num_channels
             ipl_image = cv2.cv.CreateImageHeader((image.shape[1], image.shape[0]), cv2.cv.IPL_DEPTH_8U, 1)
