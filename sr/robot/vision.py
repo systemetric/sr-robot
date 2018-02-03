@@ -8,18 +8,18 @@ from collections import namedtuple
 import cv2
 import numpy as np
 import picamera
+import picamera.array  # Required, see <https://picamera.readthedocs.io/en/latest/api_array.html>
 
 import pykoki
 from pykoki import CameraParams, Point2Df, Point2Di
 
-# TODO: work out which of these actually work/are useful.
-# TODO: more accurate values for these.
+
 picamera_focal_lengths = {  # fx, fy tuples
-    (1920, 1080): (2320.96618182, 2323.87230303),
-    (2592, 1944): (1820.3656323, 1822.644943553),
-    (1296, 972): (1531.83768, 1533.75572),
-    (1296, 730): (1531.83768, 1533.75572),
-    (640, 480): (1531.83768, 1533.75572),
+    (1920, 1440): (1393, 1395),
+    (1920, 1088): (2431, 2431),
+    (1296, 976): (955, 955),
+    (1296, 736): (962, 962),
+    (640, 480): (463, 463),
 }
 
 # Source: <https://elinux.org/Rpi_Camera_Module#Technical_Parameters_.28v.2_board.29>
@@ -179,18 +179,13 @@ class Vision(object):
         timer = Timer()
         times = {}
 
-        stream = io.BytesIO()
-
         with timer:
-            self.camera.capture(stream, format="jpeg", use_video_port=fast_capture)
+            with picamera.array.PiRGBArray(self.camera) as stream:
+                self.camera.capture(stream, format="bgr", use_video_port=fast_capture)
+                image = cv2.cvtColor(stream.array, cv2.COLOR_BGR2GRAY)
         times["cam"] = timer.time
 
         with timer:
-            # Turn the stream of bytes into a NumPy array.
-            jpeg_data = np.fromstring(stream.getvalue(), dtype=np.uint8)
-            # Decode the image from JPEG to a 2D NumPy array.
-            # `0` for the second argument indicates that the result should be greyscale.
-            image = cv2.imdecode(jpeg_data, 0)
             if save:
                 cv2.imwrite("/root/shepherd/shepherd/static/image.jpg", image)
             if os.path.exists('/media/RobotUSB/collect_images.txt'):
