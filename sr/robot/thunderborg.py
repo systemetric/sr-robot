@@ -134,7 +134,7 @@ class BlackJackBoardGPIO(object):
     def pin_mode(self, pin, mode):
         pin = self._pin_map[pin]
         if pin == 2 and mode == INPUT_ANALOG:
-            raise IndexError("Pin 2 is NOT an ANALOG input! Use something else!")
+            raise IndexError("Pin 3 is NOT an ANALOG input! Use something else!")
 
         data = 0b000
 
@@ -154,7 +154,7 @@ class BlackJackBoardGPIO(object):
     def analog_read(self, pin):
         pin = self._pin_map[pin]
         if pin == 2:
-            raise IndexError("Pin 2 is NOT an ANALOG input! Use something else!")
+            raise IndexError("Pin 3 is NOT an ANALOG input! Use something else!")
 
         # command = B_I2C_GPIO_ANALOG_START_L + (2 * (pin - 1))
         command = B_I2C_GPIO_ANALOG_START_L
