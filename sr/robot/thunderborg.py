@@ -115,7 +115,7 @@ class BlackJackBoardPWM(object):
         # print value
         # print "H:", bin(high)
         # print "L:", bin(low)
-        print "Setting Servo", key + 1, "to", percent, "% [ PWM:", value, "]"
+        # print "Setting Servo", key + 1, "to", percent, "% [ PWM:", value, "]"
 
         self._bus.write_byte_data(B_I2C_ADR, command, low)
         self._bus.write_byte_data(B_I2C_ADR, command + 1, high)
