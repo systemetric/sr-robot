@@ -94,8 +94,6 @@ class BlackJackBoardPWM(object):
         key = self._pwm_pin_map[key + 1] - 1
         command = (2 * key) + 1
 
-        print command
-
         value = self._bus.read_byte_data(B_I2C_ADR, command) + (self._bus.read_byte_data(B_I2C_ADR, command + 1) << 7)
         return (value - B_PWM_OFFSET) * 100.0 / B_PWM_RANGE
 
