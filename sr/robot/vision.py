@@ -170,6 +170,9 @@ class Vision(object):
         return lut[code].size
 
     def see(self, mode, arena, res=None, stats=False, save=True, fast_capture=True):
+        if res is not None and res not in picamera_focal_lengths:
+            raise ValueError("Invalid resolution: {}".format(res))
+
         self.lock.acquire()
         if res is not None:
             self._set_res(res)
