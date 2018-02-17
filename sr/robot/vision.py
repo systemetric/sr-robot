@@ -133,7 +133,7 @@ class Timer(object):
 
 
 class Vision(object):
-    def __init__(self, lib=None, res=(1920, 1080)):
+    def __init__(self, lib=None, res=(640, 480)):
         if lib is not None:
             self.koki = pykoki.PyKoki(lib)
         else:
