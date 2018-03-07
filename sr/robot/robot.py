@@ -70,9 +70,12 @@ class Robot(object):
     def __init__(self,
                  quiet=False,
                  init=True,
-                 config_logging=True):
+                 config_logging=True,
+                 use_usb_camera=False):
         if config_logging:
             setup_logging()
+
+        self._use_usb_camera = use_usb_camera
 
         self._initialised = False
         self._quiet = quiet
@@ -93,7 +96,7 @@ class Robot(object):
             self.wait_start()
 
     @classmethod
-    def setup(cls, quiet=False, config_logging=True):
+    def setup(cls, quiet=False, config_logging=True, use_usb_camera=False):
         if config_logging:
             setup_logging()
 
@@ -101,7 +104,8 @@ class Robot(object):
         return cls(init=False,
                    quiet=quiet,
                    # Logging is already configured
-                   config_logging=False)
+                   config_logging=False,
+                   use_usb_camera=use_usb_camera)
 
     def init(self, bus):
         # Find and initialise hardware
@@ -325,6 +329,20 @@ class Robot(object):
         return srdevs
 
     def _init_vision(self):
+        if self._use_usb_camera:
+            udev = pyudev.Context()
+            cams = list(udev.list_devices(
+                subsystem="video4linux",
+                ID_USB_DRIVER="uvcvideo",
+            ))
+
+            if not cams:
+                return
+
+            camera = cams[0].device_node
+        else:
+            camera = None
+
         # Find libkoki.so:
         libpath = None
         if "LD_LIBRARY_PATH" in os.environ:
@@ -336,9 +354,9 @@ class Robot(object):
                     break
 
         if libpath is None:
-            v = vision.Vision("/root/libkoki/lib")
+            v = vision.Vision(camera, "/root/libkoki/lib")
         else:
-            v = vision.Vision(libpath)
+            v = vision.Vision(camera, libpath)
 
         self.vision = v
 
