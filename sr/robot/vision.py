@@ -178,29 +178,25 @@ class Vision(object):
                 # Resolution already the requested one
                 return
 
-            self.lock.acquire()
-            try:
-                was_streaming = self._streaming
-                if was_streaming:
-                    self._stop_camera_stream()
+            was_streaming = self._streaming
+            if was_streaming:
+                self._stop_camera_stream()
 
-                del self.camera
-                self.camera = self.koki.open_camera(self._camera_device)
-                self.camera.format = self.koki.v4l_create_YUYV_format(*res)
+            del self.camera
+            self.camera = self.koki.open_camera(self._camera_device)
+            self.camera.format = self.koki.v4l_create_YUYV_format(*res)
 
-                fmt = self.camera.format.fmt
-                width = fmt.pix.width
-                height = fmt.pix.height
-                actual = (width, height)
-                if res != actual:
-                    raise ValueError("Unsupported image resolution {0} (got: {1})".format(res, actual))
+            fmt = self.camera.format.fmt
+            width = fmt.pix.width
+            height = fmt.pix.height
+            actual = (width, height)
+            if res != actual:
+                raise ValueError("Unsupported image resolution {0} (got: {1})".format(res, actual))
 
-                self._res = actual
+            self._res = actual
 
-                if was_streaming:
-                    self._start_camera_stream()
-            finally:
-                self.lock.release()
+            if was_streaming:
+                self._start_camera_stream()
 
     def _start_camera_stream(self):
         assert not isinstance(self.camera, picamera.PiCamera)
