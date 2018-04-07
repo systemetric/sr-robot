@@ -185,12 +185,12 @@ class Vision(object):
         with timer:
             with picamera.array.PiRGBArray(self.camera) as stream:
                 self.camera.capture(stream, format="bgr", use_video_port=fast_capture)
+                if save:
+                    cv2.imwrite("/tmp/colimage.jpg", stream.array)
                 image = cv2.cvtColor(stream.array, cv2.COLOR_BGR2GRAY)
         times["cam"] = timer.time
 
         with timer:
-            if save:
-                cv2.imwrite("/root/shepherd/shepherd/static/image.jpg", image)
             if os.path.exists('/media/RobotUSB/collect_images.txt'):
                 filename = "/media/RobotUSB/" + str(int(acq_time)) + ".jpg"
                 cv2.imwrite(filename, image)
