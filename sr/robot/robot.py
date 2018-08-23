@@ -11,7 +11,7 @@ import smbus
 
 from sr.robot.thunderborg import ThunderBorgBoard, BlackJackBoardPWM, BlackJackBoardGPIO
 
-from sr.robot import power, ruggeduino, vision
+from sr.robot import power, vision
 
 logger = logging.getLogger("sr.robot")
 
@@ -81,9 +81,6 @@ class Robot(object):
         # self._acquire_syslock()
 
         self._parse_cmdline()
-
-        self._ruggeduino_id_handlers = {}
-        self._ruggeduino_fwver_handlers = {"SRduino": ruggeduino.Ruggeduino}
 
         bus = smbus.SMBus(1)
         self.gpio = BlackJackBoardGPIO(bus)
@@ -205,22 +202,6 @@ class Robot(object):
         if self.arena not in ["A", "B"]:
             raise Exception("arena must be A or B")
 
-    @pre_init
-    def ruggeduino_set_handler_by_id(self, r_id, handler):
-        logger.debug("Ruggeduino handler set for ID '%s'", r_id)
-        self._ruggeduino_id_handlers[r_id] = handler
-
-    @pre_init
-    def ruggeduino_set_handler_by_fwver(self, fwver, handler):
-        logger.debug("Ruggeduino handler set for firmware version '%s'", fwver)
-        self._ruggeduino_fwver_handlers[fwver] = handler
-
-    @pre_init
-    def ruggeduino_ignore_id(self, r_id):
-        """Ignore the Ruggeduino with the given ID"""
-        logger.debug("Ruggeduino ID '%s' set to be ignored", r_id)
-        self.ruggeduino_set_handler_by_id(r_id, ruggeduino.IgnoredRuggeduino)
-
     def _init_devs(self, bus):
         """Initialise the attributes for accessing devices"""
 
@@ -230,8 +211,6 @@ class Robot(object):
         self._init_motors()
         # Servo boards
         self._init_servos(bus)
-        # Ruggeduinos
-        self._init_ruggeduinos()
 
     def _init_power(self):
         boards = self._init_usb_devices("Power_board_v4", power.Power)
@@ -257,33 +236,6 @@ class Robot(object):
 
     def _init_servos(self, bus):
         self.servos = BlackJackBoardPWM(bus)
-
-    def _init_ruggeduinos(self):
-        self.ruggeduinos = {}
-
-        for n, dev in enumerate(self._list_usb_devices("Ruggeduino", subsystem="tty")):
-            handler = None
-
-            snum = dev["ID_SERIAL_SHORT"]
-            if snum in self._ruggeduino_id_handlers:
-                handler = self._ruggeduino_id_handlers[snum]
-
-            else:
-                # There's no ID-specific handler, so we can query it for
-                # its firmware version.
-                r = ruggeduino.RuggeduinoCmdBase(dev.device_node)
-                ver = r.firmware_version_read()
-                genre = ver.split(":")[0]
-
-                if genre in self._ruggeduino_fwver_handlers:
-                    handler = self._ruggeduino_fwver_handlers[genre]
-
-            if handler is None:
-                raise Exception("No handler found for ruggeduino: serial {0}, firmware '{1}'".format(snum, genre))
-
-            srdev = handler(dev.device_node, snum)
-            self.ruggeduinos[n] = srdev
-            self.ruggeduinos[snum] = srdev
 
     def _list_usb_devices(self, model, subsystem=None):
         """Create a sorted list of USB devices of the given type"""

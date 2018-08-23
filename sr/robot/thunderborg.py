@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import ThunderBorg
-
 B_I2C_ADR = 0x08
 
 B_I2C_GPIO_ANALOG_START_L = 13
@@ -16,66 +14,6 @@ INPUT = 0
 OUTPUT = 1
 INPUT_ANALOG = 2
 INPUT_PULLUP = 3
-
-
-class ThunderBorgMotorChannel(object):
-    def __init__(self, tb, index):
-        self._tb = tb
-        self._index = index
-
-    @property
-    def power(self):
-        if self._index == 0:
-            return self._tb.GetMotor1() * 100.0
-        else:
-            return self._tb.GetMotor2() * 100.0
-
-    @power.setter
-    def power(self, value):
-        if self._index == 0:
-            self._tb.SetMotor1(float(value) / 100.0)
-        else:
-            self._tb.SetMotor2(float(value) / 100.0)
-
-
-class ThunderBorgLED(object):
-    def __init__(self, tb):
-        self._tb = tb
-
-        if self._tb.foundChip:
-            self._tb.SetLedShowBattery(False)
-            self._tb.SetLed1(1.0, 1.0, 1.0)
-
-    @property
-    def colour(self):
-        return self._tb.GetLed1()
-
-    @colour.setter
-    def colour(self, value):
-        self._tb.SetLed1(float(value[0]) / 255.0, float(value[1]) / 255.0, float(value[2]) / 255.0)
-
-    def off(self):
-        self._tb.SetLedShowBattery(True)
-
-
-class ThunderBorgBoard(object):
-    def __init__(self, address=ThunderBorg.I2C_ID_THUNDERBORG):
-        self._tb = ThunderBorg.ThunderBorg()
-        self._tb.i2cAddress = address
-        self._tb.Init()
-
-        if not self._tb.foundChip:
-            raise Exception("No ThunderBorg at {}".format(address))
-
-        self.m0 = ThunderBorgMotorChannel(self._tb, 0)
-        self.m1 = ThunderBorgMotorChannel(self._tb, 1)
-        self.led = ThunderBorgLED(self._tb)
-
-    def off(self):
-        if self._tb.foundChip:
-            print "Switching ThunderBorg off at %02X" % self._tb.i2cAddress
-            self._tb.MotorsOff()
-            self.led.off()
 
 
 class BlackJackBoardPWM(object):
